@@ -25,8 +25,8 @@ import game2D.*;
 public class Game extends GameCore 
 {
 	// Useful game constants
-	static int screenWidth = 512;
-	static int screenHeight = 384;
+	static int screenWidth = 1024;
+	static int screenHeight = 768;
 
     float 	lift = 0.005f;
     float	gravity = 0.0001f;
@@ -39,6 +39,8 @@ public class Game extends GameCore
     
     Sprite	player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
+
+    ArrayList<ArrayList> backgroundList = new ArrayList<>();
 
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
     
@@ -85,7 +87,8 @@ public class Game extends GameCore
         // Load a single cloud animation
         Animation ca = new Animation();
         ca.addFrame(loadImage("images/cloud.png"), 1000);
-        
+
+        loadBackgrounds();
         // Create 3 clouds at random positions off the screen
         // to the right
         for (int c=0; c<3; c++)
@@ -134,12 +137,15 @@ public class Game extends GameCore
 
         // If relative, adjust the offset so that
         // it is relative to the player
-
         // ...?
-        
-        g.setColor(Color.white);
-        g.fillRect(0, 0, getWidth(), getHeight());
-        
+        if (player.getX() >= 250){
+            xo = 250 - (int)player.getX();
+        }
+        drawBackgrounds(g, xo, yo);
+
+//        g.setColor(Color.white);
+//        g.fillRect(0, 0, getWidth(), getHeight());
+
         // Apply offsets to sprites then draw them
         for (Sprite s: clouds)
         {
@@ -235,6 +241,10 @@ public class Game extends GameCore
     		Sound s = new Sound("sounds/caw.wav");
     		s.start();
     	}
+
+        if (key == KeyEvent.VK_D) {
+            player.setVelocityX(1f);
+        }
     }
 
     public boolean boundingBoxCollision(Sprite s1, Sprite s2)
@@ -302,7 +312,33 @@ public class Game extends GameCore
 		{
 			case KeyEvent.VK_ESCAPE : stop(); break;
 			case KeyEvent.VK_UP     : flap = false; break;
+            case KeyEvent.VK_D      : player.setVelocityX(0f); break;
 			default :  break;
 		}
 	}
+
+	public void loadBackgrounds(){
+        for (int i = 0; i < 8; i++){
+            Animation bg = new Animation();
+            bg.addFrame(loadImage("backgrounds/" + i + ".png"), 1000);
+            ArrayList<Sprite> bgList = new ArrayList<>();
+            for (int j = 0; j < 3; j++){
+                Sprite s = new Sprite(bg);
+                s.setX(0+j*500);
+                s.setY(0);
+                s.show();
+                bgList.add(s);
+            }
+            backgroundList.add(bgList);
+        }
+    }
+
+    public void drawBackgrounds(Graphics2D g, int xo, int yo){
+        for (ArrayList<Sprite> l: backgroundList){
+            for (Sprite s: l){
+                s.setOffsets(xo, yo);
+                s.draw(g);
+            }
+        }
+    }
 }

@@ -1,4 +1,4 @@
-64 12 32 32
+64 12 96 96
 // The first line should contain the width and height of the
 // map and the width and height of each tile. A list of character to
 // tile mappings is then provided where each character is preceded by a
