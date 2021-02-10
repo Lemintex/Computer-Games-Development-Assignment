@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import java.awt.*;
+import java.util.LinkedList;
 
 
 import game2D.*;
@@ -40,12 +41,12 @@ public class Game extends GameCore
     Sprite	player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
 
-    ArrayList<ArrayList> backgroundList = new ArrayList<>();
+    ArrayList<LinkedList> backgroundList = new ArrayList<>();
 
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
     
     long total;         			// The score will be the total time elapsed since a crash
-
+    String[] level1Backgrounds = {"layer01_Ground", "layer02_Trees", "layer03_Hills_1", "layer04_Hills_2", "layer05_Clouds", "layer06_Rocks", "layer07_Sky"};
 
     /**
 	 * The obligatory main method that creates
@@ -88,7 +89,7 @@ public class Game extends GameCore
         Animation ca = new Animation();
         ca.addFrame(loadImage("images/cloud.png"), 1000);
 
-        loadBackgrounds();
+        loadAllBackgrounds(backgroundList, level1Backgrounds);
         // Create 3 clouds at random positions off the screen
         // to the right
         for (int c=0; c<3; c++)
@@ -141,7 +142,7 @@ public class Game extends GameCore
         if (player.getX() >= 250){
             xo = 250 - (int)player.getX();
         }
-        drawBackgrounds(g, xo, yo);
+        drawParallaxSprites(g, xo, yo, backgroundList);
 
 //        g.setColor(Color.white);
 //        g.fillRect(0, 0, getWidth(), getHeight());
@@ -184,7 +185,7 @@ public class Game extends GameCore
        		player.setAnimationSpeed(1.8f);
        		player.setVelocityY(-0.04f);
        	}
-       	for (ArrayList<Sprite> l : backgroundList){
+       	for (LinkedList<Sprite> l : backgroundList){
        	    for (Sprite s : l){
        	        s.update(elapsed);
             }
@@ -326,43 +327,42 @@ public class Game extends GameCore
 		}
 	}
 
-	public void loadBackgrounds(){
-        for (int i = 0; i < 7; i++){
+    public void loadAllBackgrounds(ArrayList<LinkedList> bgList, String[] filenames) {
+        for (String s : filenames) {
+            bgList.add(loadBackgrounds(s));
+        }
+    }
+
+    public LinkedList<Sprite> loadBackgrounds(String path){
             Animation bg = new Animation();
-            bg.addFrame(loadImage("backgrounds/" + i + ".png"), 1000);
-            ArrayList<Sprite> bgList = new ArrayList<>();
+            bg.addFrame(loadImage(path), 1000);
+            LinkedList<Sprite> bgList = new LinkedList<>();
             for (int j = 0; j < 3; j++){
                 Sprite s = new Sprite(bg);
                 s.setX(0+j*s.getWidth());
                 s.setY(0);
-                s.setVelocityX((float) (-i*0.01));
+                s.setVelocityX((float) (-j*0.01));
                 s.show();
                 bgList.add(s);
-
             }
-            backgroundList.add(bgList);
-        }
+            return bgList;
     }
 
-    public void drawBackgrounds(Graphics2D g, int xo, int yo){
+    public void drawParallaxSprites(Graphics2D g, int xo, int yo, ArrayList<LinkedList> spritelists){
         int iterator = 0;
         boolean swapL = false, swapR = false;
-        for (ArrayList<Sprite> l: backgroundList){
+        for (LinkedList<Sprite> l: spritelists){
             for (Sprite s: l){
                 if (s.getX()+s.getWidth()<0){
-                    s.setX(l.get(2).getX()+l.get(2).getWidth());
-                    swapR = true;
+                    s.setX(l.getLast().getX()+l.getLast().getWidth());
+                    l.add(l.pop());
+                    s.draw(g);
+                    break;
                 }
-                else {
                     s.draw(g);
                 }
-            }
-            if (swapR) {
-                backgroundList.get(iterator).add(l.get(0));
-                backgroundList.get(iterator).remove(0);
             }
             iterator++;
             swapR = false;
         }
     }
-}
