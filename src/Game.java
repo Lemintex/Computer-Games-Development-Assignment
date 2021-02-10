@@ -72,7 +72,7 @@ public class Game extends GameCore
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt");
         
-        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
+        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight()+64);
         setVisible(true);
 
         // Create a set of background sprites that we can 
@@ -184,7 +184,11 @@ public class Game extends GameCore
        		player.setAnimationSpeed(1.8f);
        		player.setVelocityY(-0.04f);
        	}
-                
+       	for (ArrayList<Sprite> l : backgroundList){
+       	    for (Sprite s : l){
+       	        s.update(elapsed);
+            }
+        }
        	for (Sprite s: clouds)
        		s.update(elapsed);
        	
@@ -244,6 +248,9 @@ public class Game extends GameCore
 
         if (key == KeyEvent.VK_D) {
             player.setVelocityX(1f);
+        }
+        else if (key == KeyEvent.VK_A){
+            player.setVelocityX(-1f);
         }
     }
 
@@ -312,33 +319,50 @@ public class Game extends GameCore
 		{
 			case KeyEvent.VK_ESCAPE : stop(); break;
 			case KeyEvent.VK_UP     : flap = false; break;
-            case KeyEvent.VK_D      : player.setVelocityX(0f); break;
-			default :  break;
+            case KeyEvent.VK_D      :
+            case KeyEvent.VK_A      :
+                player.setVelocityX(0f); break;
+            default :  break;
 		}
 	}
 
 	public void loadBackgrounds(){
-        for (int i = 0; i < 8; i++){
+        for (int i = 0; i < 7; i++){
             Animation bg = new Animation();
             bg.addFrame(loadImage("backgrounds/" + i + ".png"), 1000);
             ArrayList<Sprite> bgList = new ArrayList<>();
             for (int j = 0; j < 3; j++){
                 Sprite s = new Sprite(bg);
-                s.setX(0+j*500);
+                s.setX(0+j*s.getWidth());
                 s.setY(0);
+                s.setVelocityX((float) (-i*0.01));
                 s.show();
                 bgList.add(s);
+
             }
             backgroundList.add(bgList);
         }
     }
 
     public void drawBackgrounds(Graphics2D g, int xo, int yo){
+        int iterator = 0;
+        boolean swapL = false, swapR = false;
         for (ArrayList<Sprite> l: backgroundList){
             for (Sprite s: l){
-                s.setOffsets(xo, yo);
-                s.draw(g);
+                if (s.getX()+s.getWidth()<0){
+                    s.setX(l.get(2).getX()+l.get(2).getWidth());
+                    swapR = true;
+                }
+                else {
+                    s.draw(g);
+                }
             }
+            if (swapR) {
+                backgroundList.get(iterator).add(l.get(0));
+                backgroundList.get(iterator).remove(0);
+            }
+            iterator++;
+            swapR = false;
         }
     }
 }
