@@ -80,11 +80,11 @@ public class Game extends GameCore
         // rearrange to give the illusion of motion
         
         landing = new Animation();
-        landing.loadAnimationFromSheet("images/landbird.png", 4, 1, 60);
+        landing.loadAnimationFromSheet("images/idle.png", 4, 1, 60);
         
         // Initialise the player with an animation
         player = new Sprite(landing);
-        
+
         // Load a single cloud animation
         Animation ca = new Animation();
         ca.addFrame(loadImage("images/cloud.png"), 1000);
@@ -115,9 +115,8 @@ public class Game extends GameCore
     public void initialiseGame()
     {
     	total = 0;
-    	      
         player.setX(64);
-        player.setY(200);
+        player.setY(600);
         player.setVelocityX(0);
         player.setVelocityY(0);
         player.show();
@@ -143,7 +142,6 @@ public class Game extends GameCore
             xo = 250 - (int)player.getX();
         }
         drawParallaxSprites(g, backgroundList);
-
 //        g.setColor(Color.white);
 //        g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -156,7 +154,8 @@ public class Game extends GameCore
 
         // Apply offsets to player and draw 
         player.setOffsets(xo, yo);
-        player.draw(g);
+        player.drawTransformed(g);
+        player.drawBoundingBox(g);
                 
         // Apply offsets to tile map and draw  it
         tmap.draw(g,xo,yo);    
@@ -195,7 +194,7 @@ public class Game extends GameCore
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
-        if (!player.getGrounded()) {
+        if (!player.isGrounded()) {
             player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
         }
         else{
@@ -256,6 +255,10 @@ public class Game extends GameCore
         else if (key == KeyEvent.VK_A) {
             player.setVelocityX(-0.1f);
         }
+        if (key == KeyEvent.VK_SPACE && player.isGrounded()){
+            gravity = -gravity;
+            player.setGrounded(false);
+        }
     }
 
     public boolean boundingBoxCollision(Sprite s1, Sprite s2)
@@ -305,7 +308,11 @@ public class Game extends GameCore
 
         if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
             if (TL != '.' || TR != '.'){
-
+                if (gravity < 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) || sy >= tmap.getTileYC(BLxtile, BLytile))){
+                    System.out.println(tmap.getTileYC(BLxtile, BLytile));
+                    s.setGrounded(true);
+                    System.out.println("collision");
+                }
             }
             if (BL != '.' || BR != '.'){
                 if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight)){

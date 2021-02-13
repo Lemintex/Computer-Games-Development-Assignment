@@ -16,23 +16,19 @@ public class Sprite {
     private Animation anim;		
 
     // Position (pixels)
-    private float x;
-    private float y;
+    private float x, y;
 
     // Velocity (pixels per millisecond)
-    private float dx;
-    private float dy;
+    private float dx, dy;
 
     // Dimensions of the sprite
-    private float height;
-    private float width;
-    private float radius;
+    private float height, width, radius;
 
     //Sprite touching ground
     boolean ground;
 
     // The scale to draw the sprite at where 1 equals normal size
-    private double scale;
+    private double scaleX, scaleY;
     // The rotation to apply to the sprite image
     private double rotation;
 
@@ -41,20 +37,20 @@ public class Sprite {
     
     // The draw offset associated with this sprite. Used to draw it
     // relative to specific on screen position (usually the player)
-    private int xoff=0;
-    private int yoff=0;
+    private int xoff = 0, yoff = 0;
+
 
     /**
-     *  Creates a new Sprite object with the specified Animation.
+     * Creates a new Sprite object with the specified Animation.
      *  
      * @param anim The animation to use for the sprite.
-     * 
      */
     public Sprite(Animation anim) {
         ground = false;
         this.anim = anim;
         render = true;
-        scale = 1.0f;
+        scaleX = 1.0f;
+        scaleY = 1.0f;
         rotation = 0.0f;
     }
 
@@ -71,7 +67,7 @@ public class Sprite {
     /**
      * Set the current animation to the given 'frame'
      * 
-     * @param frame The frame to set the animation to
+     * @param frame The frame to set the animation to.
      */
     public void setAnimationFrame(int frame)
     {
@@ -80,7 +76,7 @@ public class Sprite {
     
     /**
      * Pauses the animation at its current frame. Note that the 
-     * sprite will continue to move, it just won't animate
+     * sprite will continue to move, it just won't animate.
      */
     public void pauseAnimation()
     {
@@ -90,7 +86,7 @@ public class Sprite {
     /**
      * Pause the animation when it reaches frame 'f'. 
      * 
-     * @param f The frame to stop the animation at
+     * @param f The frame to stop the animation at.
      */
     public void pauseAnimationAtFrame(int f)
     {
@@ -121,10 +117,9 @@ public class Sprite {
     }
     
     /**
-     * Returns a reference to the current animation
-     * assigned to this sprite.
-     * 
-     * @return A reference to the current animation
+     * Returns a reference to the sprite's current animation
+     *
+     * @return A reference to the current animation.
      */
     public Animation getAnimation()
     {
@@ -132,11 +127,11 @@ public class Sprite {
     }
 
     /**
-        Updates this Sprite's Animation and its position based
-        on the elapsedTime.
-        
-        @param elapsedTime The time that has elapsed since the last call to update
-    */
+     * Updates this sprite's Animation and its position based
+     * on the elapsedTime.
+     *
+     * @param elapsedTime The time that has elapsed since the last call to update.
+     */
     public void update(long elapsedTime) {
     	if (!render) return;
         x += dx * elapsedTime;
@@ -151,22 +146,26 @@ public class Sprite {
     }
 
     /**
-        Gets this Sprite's current x position.
-    */
+     * Gets this Sprite's current x position.
+     *
+     * @return A reference to the sprites x position.
+     */
     public float getX() {
         return x;
     }
 
     /**
-        Gets this Sprite's current y position.
-    */
+     * Gets this Sprite's current y position.
+     *
+     * @return A reference to the sprites y position.
+     */
     public float getY() {
         return y;
     }
 
     /**
-        Sets this Sprite's current x position.
-    */
+     *   Sets this Sprite's current x position.
+     */
     public void setX(float x) {
         this.x = x;
     }
@@ -270,20 +269,26 @@ public class Sprite {
 		scaling and rotation are only applied when
 		using the drawTransformed method.
 	*/
-    public void setScale(float s)
+    public void setScaleX(float x)
     {
-    	scale = s;
+    	scaleX = x;
     }
 
-	/**
+    public void setScaleY(float y) { scaleY = y; }
+
+    /**
 		Get the current value of the scaling attribute.
 		See 'setScale' for more information.
 	*/
-    public double getScale()
+    public double getScaleX()
     {
-    	return scale;
+    	return scaleX;
     }
 
+    public double getScale()
+    {
+        return scaleY;
+    }
 	/**
 		Set the rotation angle for the sprite in degrees.
 		Note that scaling and rotation are only applied when
@@ -369,7 +374,7 @@ public class Sprite {
 
 		AffineTransform transform = new AffineTransform();
 		transform.translate(Math.round(x)+xoff,Math.round(y)+yoff);
-		transform.scale(scale,scale);
+		transform.scale(scaleX,scaleY);
 		transform.rotate(rotation,getImage().getWidth(null)/2,getImage().getHeight(null)/2);
 		// Apply transform to the image and draw it
 		g.drawImage(getImage(),transform,null);
@@ -414,7 +419,7 @@ public class Sprite {
         Returns the value of the boolean tracking whether the
         sprite is touching the ground.
      */
-    public boolean getGrounded(){
+    public boolean isGrounded(){
         return ground;
     }
 
