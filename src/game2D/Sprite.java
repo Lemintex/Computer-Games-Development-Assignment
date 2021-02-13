@@ -28,6 +28,9 @@ public class Sprite {
     private float width;
     private float radius;
 
+    //Sprite touching ground
+    boolean ground;
+
     // The scale to draw the sprite at where 1 equals normal size
     private double scale;
     // The rotation to apply to the sprite image
@@ -44,10 +47,11 @@ public class Sprite {
     /**
      *  Creates a new Sprite object with the specified Animation.
      *  
-     * @param a The animation to use for the sprite.
+     * @param anim The animation to use for the sprite.
      * 
      */
     public Sprite(Animation anim) {
+        ground = false;
         this.anim = anim;
         render = true;
         scale = 1.0f;
@@ -131,7 +135,7 @@ public class Sprite {
         Updates this Sprite's Animation and its position based
         on the elapsedTime.
         
-        @param The time that has elapsed since the last call to update
+        @param elapsedTime The time that has elapsed since the last call to update
     */
     public void update(long elapsedTime) {
     	if (!render) return;
@@ -397,6 +401,21 @@ public class Sprite {
     	xoff = x;
     	yoff = y;
     }
-    
+
+    /**
+        Set the value of the boolean tracking whether the
+        sprite is touching the ground to g.
+     */
+    public void setGrounded(boolean g){
+        ground = g;
+    }
+
+    /**
+        Returns the value of the boolean tracking whether the
+        sprite is touching the ground.
+     */
+    public boolean getGrounded(){
+        return ground;
+    }
 
 }

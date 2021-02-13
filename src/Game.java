@@ -33,7 +33,7 @@ public class Game extends GameCore
     float	gravity = 0.0001f;
     
     // Game state flags
-    boolean flap = false;
+    boolean flap = false, left = false, right = false;
 
     // Game resources
     Animation landing;
@@ -46,7 +46,7 @@ public class Game extends GameCore
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
     
     long total;         			// The score will be the total time elapsed since a crash
-    String[] level1Backgrounds = {"layer01_Ground", "layer02_Trees", "layer03_Hills_1", "layer04_Hills_2", "layer05_Clouds", "layer06_Rocks", "layer07_Sky"};
+    String[] level1Backgrounds = {"layer07_Sky", "layer06_Rocks", "layer05_Clouds", "layer04_Hills_2", "layer03_Hills_1", "layer02_Trees", "layer01_Ground"};
 
     /**
 	 * The obligatory main method that creates
@@ -89,7 +89,7 @@ public class Game extends GameCore
         Animation ca = new Animation();
         ca.addFrame(loadImage("images/cloud.png"), 1000);
 
-        loadAllBackgrounds(backgroundList, level1Backgrounds);
+        loadAllBackgrounds(backgroundList, level1Backgrounds, "level1/");
         // Create 3 clouds at random positions off the screen
         // to the right
         for (int c=0; c<3; c++)
@@ -142,7 +142,7 @@ public class Game extends GameCore
         if (player.getX() >= 250){
             xo = 250 - (int)player.getX();
         }
-        drawParallaxSprites(g, xo, yo, backgroundList);
+        drawParallaxSprites(g, backgroundList);
 
 //        g.setColor(Color.white);
 //        g.fillRect(0, 0, getWidth(), getHeight());
@@ -174,10 +174,6 @@ public class Game extends GameCore
      */    
     public void update(long elapsed)
     {
-    	
-        // Make adjustments to the speed of the sprite due to gravity
-        player.setVelocityY(player.getVelocityY()+(gravity*elapsed));
-    	    	
        	player.setAnimationSpeed(1.0f);
        	
        	if (flap) 
@@ -199,6 +195,13 @@ public class Game extends GameCore
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
+        if (!player.getGrounded()) {
+            player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
+        }
+        else{
+            player.setVelocityY(0);
+        }
+
     }
     
     
@@ -243,15 +246,15 @@ public class Game extends GameCore
     	if (key == KeyEvent.VK_S)
     	{
     		// Example of playing a sound as a thread
-    		Sound s = new Sound("sounds/caw.wav");
-    		s.start();
+    	//	Sound s = new Sound("sounds/caw.wav");
+    	//	s.start();
     	}
 
         if (key == KeyEvent.VK_D) {
-            player.setVelocityX(1f);
+            player.setVelocityX(0.1f);
         }
-        else if (key == KeyEvent.VK_A){
-            player.setVelocityX(-1f);
+        else if (key == KeyEvent.VK_A) {
+            player.setVelocityX(-0.1f);
         }
     }
 
@@ -270,6 +273,8 @@ public class Game extends GameCore
 
     public void checkTileCollision(Sprite s, TileMap tmap)
     {
+        char TL, BL, TR, BR;
+
     	// Take a note of a sprite's current position
     	float sx = s.getX();
     	float sy = s.getY();
@@ -278,62 +283,72 @@ public class Game extends GameCore
     	float tileWidth = tmap.getTileWidth();
     	float tileHeight = tmap.getTileHeight();
     	
-    	// Divide the sprite’s x coordinate by the width of a tile, to get
-    	// the number of tiles across the x axis that the sprite is positioned at 
-    	int	xtile = (int)(sx / tileWidth);
-    	// The same applies to the y coordinate
-    	int ytile = (int)(sy / tileHeight);
-    	
-    	// What tile character is at the top left of the sprite s?
-    	char ch = tmap.getTileChar(xtile, ytile);
-    	
-    	
-    	if (ch != '.') // If it's not a dot (empty space), handle it
-    	{
-    		// Here we just stop the sprite. 
-    		s.stop();
-    		// You should move the sprite to a position that is not colliding
-    	}
-    	
-    	// We need to consider the other corners of the sprite
-    	// The above looked at the top left position, let's look at the bottom left.
-    	xtile = (int)(sx / tileWidth);
-    	ytile = (int)((sy + s.getHeight())/ tileHeight);
-    	ch = tmap.getTileChar(xtile, ytile);
-    	
-    	// If it's not empty space
-     	if (ch != '.') 
-    	{
-    		// Let's make the sprite bounce
-    		s.setVelocityY(-s.getVelocityY()); // Reverse velocity 
-    	}
+    	//TOP LEFT
+    	int	TLxtile = (int)(sx / tileWidth);
+    	int TLytile = (int)(sy / tileHeight);
+    	TL = tmap.getTileChar(TLxtile, TLytile);
+
+    	//BOTTOM LEFT
+        int BLxtile = (int)(sx / tileWidth);
+    	int BLytile = (int)((sy + s.getHeight())/ tileHeight);
+    	BL = tmap.getTileChar(BLxtile, BLytile);
+
+    	//TOP RIGHT
+     	int TRxtile = (int)((sx + s.getWidth())/tileWidth);
+     	int TRytile = (int)(sy/tileHeight);
+     	TR = tmap.getTileChar(TRxtile, TRytile);
+
+        //BOTTOM RIGHT
+        int BRxtile = (int)((sx + s.getWidth())/tileWidth);
+        int BRytile = (int)((sy + s.getHeight())/tileHeight);
+        BR = tmap.getTileChar(BRxtile, BRytile);
+
+        if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
+            if (TL != '.' || TR != '.'){
+
+            }
+            if (BL != '.' || BR != '.'){
+                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight)){
+                    System.out.println(tmap.getTileYC(BLxtile, BLytile));
+                    s.setGrounded(true);
+                    System.out.println("collision");
+                }
+            }
+        }
+        else {
+            s.setGrounded(false);
+        }
     }
 
-
 	public void keyReleased(KeyEvent e) { 
-
 		int key = e.getKeyCode();
-
 		// Switch statement instead of lots of ifs...
 		// Need to use break to prevent fall through.
 		switch (key)
 		{
-			case KeyEvent.VK_ESCAPE : stop(); break;
-			case KeyEvent.VK_UP     : flap = false; break;
-            case KeyEvent.VK_D      :
-            case KeyEvent.VK_A      :
-                player.setVelocityX(0f); break;
+			case KeyEvent.VK_ESCAPE: stop(); break;
+			case KeyEvent.VK_UP: {
+                flap = false;
+                break;
+            }
+            case KeyEvent.VK_D:
+            case KeyEvent.VK_A: {
+                player.setVelocityX(0f);
+                break;
+            }
             default :  break;
 		}
 	}
 
-    public void loadAllBackgrounds(ArrayList<LinkedList> bgList, String[] filenames) {
+    public void loadAllBackgrounds(ArrayList<LinkedList> bgList, String[] filenames, String directory) {
+        float bgSpeed = 0;
         for (String s : filenames) {
-            bgList.add(loadBackgrounds(s));
+            bgList.add(loadBackgrounds("backgrounds/" + directory + s + ".png", bgSpeed));
+            bgSpeed++;
         }
     }
 
-    public LinkedList<Sprite> loadBackgrounds(String path){
+    public LinkedList<Sprite> loadBackgrounds(String path, float bgSpeed){
             Animation bg = new Animation();
             bg.addFrame(loadImage(path), 1000);
             LinkedList<Sprite> bgList = new LinkedList<>();
@@ -341,28 +356,46 @@ public class Game extends GameCore
                 Sprite s = new Sprite(bg);
                 s.setX(0+j*s.getWidth());
                 s.setY(0);
-                s.setVelocityX((float) (-j*0.01));
                 s.show();
                 bgList.add(s);
             }
             return bgList;
     }
 
-    public void drawParallaxSprites(Graphics2D g, int xo, int yo, ArrayList<LinkedList> spritelists){
-        int iterator = 0;
+    public void drawParallaxSprites(Graphics2D g, ArrayList<LinkedList> spriteLists){
+        int iterator = 1;
         boolean swapL = false, swapR = false;
-        for (LinkedList<Sprite> l: spritelists){
+        float backgroundSpeed = 0f;
+        if (player.getVelocityX()<0){
+            backgroundSpeed = 0.01f;
+        }
+        else if (player.getVelocityX()>0){
+            backgroundSpeed = -0.01f;
+        }
+        for (LinkedList<Sprite> l: spriteLists){
             for (Sprite s: l){
+                s.setVelocityX(backgroundSpeed*iterator);
                 if (s.getX()+s.getWidth()<0){
                     s.setX(l.getLast().getX()+l.getLast().getWidth());
-                    l.add(l.pop());
-                    s.draw(g);
-                    break;
+                    swapR = true;
                 }
-                    s.draw(g);
+                else if (s.getX()-s.getWidth()>screenWidth){
+                    s.setX(l.getFirst().getX()-l.getFirst().getWidth());
+                    swapL = true;
                 }
+                s.draw(g);
             }
             iterator++;
-            swapR = false;
+            if (swapR) {
+                l.add(l.pop());
+                swapR = false;
+            }
+            else if (swapL){
+                l.add(0, l.removeLast());
+                swapL = false;
+            }
         }
+        iterator++;
+
     }
+}
