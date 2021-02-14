@@ -251,9 +251,11 @@ public class Game extends GameCore
 
         if (key == KeyEvent.VK_D) {
             player.setVelocityX(0.1f);
+            player.setScaleX(-1);
         }
         else if (key == KeyEvent.VK_A) {
             player.setVelocityX(-0.1f);
+            player.setScaleX(1);
         }
         if (key == KeyEvent.VK_SPACE && player.isGrounded()){
             gravity = -gravity;

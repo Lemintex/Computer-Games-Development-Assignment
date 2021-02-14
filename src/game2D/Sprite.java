@@ -8,7 +8,7 @@ import java.awt.geom.*;
  * This class provides the functionality for a moving animated image or Sprite.
  * 
  * @author David Cairns
- *
+ * @author Aaron Nobile
  */
 public class Sprite {
 
@@ -164,22 +164,22 @@ public class Sprite {
     }
 
     /**
-     *   Sets this Sprite's current x position.
+     * Sets this Sprite's current x position.
      */
     public void setX(float x) {
         this.x = x;
     }
 
     /**
-        Sets this Sprite's current y position.
-    */
+     * Sets this Sprite's current y position.
+     */
     public void setY(float y) {
         this.y = y;
     }
 
     /**
-	    Sets this Sprite's new x and y position.
-	*/
+	 * Sets this Sprite's new x and y position.
+	 */
 	public void setPosition(float x, float y) 
 	{
 	    this.x = x;
@@ -197,78 +197,78 @@ public class Sprite {
     }
     
     /**
-        Gets this Sprite's width, based on the size of the
-        current image.
-    */
+     * Gets this Sprite's width, based on the size of the
+     * current image.
+     */
     public int getWidth() {
         return anim.getImage().getWidth(null);
     }
 
     /**
-        Gets this Sprite's height, based on the size of the
-        current image.
-    */
+     * Gets this Sprite's height, based on the size of the
+     * current image.
+     */
     public int getHeight() {
         return anim.getImage().getHeight(null);
     }
 
     /**
-    	Gets the sprites radius in pixels
-    */
+     * Gets the sprites radius in pixels
+     */
     public float getRadius()
     {
     	return radius;
     }
 
     /**
-        Gets the horizontal velocity of this Sprite in pixels
-        per millisecond.
-    */
+     * Gets the horizontal velocity of this Sprite in pixels
+     * per millisecond.
+     */
     public float getVelocityX() {
         return dx;
     }
 
     /**
-        Gets the vertical velocity of this Sprite in pixels
-        per millisecond.
-    */
+     * Gets the vertical velocity of this Sprite in pixels
+     * per millisecond.
+     */
     public float getVelocityY() {
         return dy;
     }
     
 
     /**
-        Sets the horizontal velocity of this Sprite in pixels
-        per millisecond.
-    */
+     * Sets the horizontal velocity of this Sprite in pixels
+     * per millisecond.
+     */
     public void setVelocityX(float dx) {
         this.dx = dx;
     }
 
     /**
-        Sets the vertical velocity of this Sprite in pixels
-        per millisecond.
-    */
+     * Sets the vertical velocity of this Sprite in pixels
+     * per millisecond.
+     */
     public void setVelocityY(float dy) {
         this.dy = dy;
     }
 
     /**
-    	Sets the horizontal and vertical velocity of this Sprite in pixels
-    	per millisecond.
-	*/
+     * Sets the horizontal and vertical velocity of this Sprite in pixels
+     * per millisecond.
+	 */
 	public void setVelocity(float dx, float dy) {
 		this.dx = dx;
 		this.dy = dy;
 	}
 
 	/**
-		Set the scale of the sprite to 's'. If s is 1
-		the sprite will be drawn at normal size. If 's'
-		is 0.5 it will be drawn at half size. Note that
-		scaling and rotation are only applied when
-		using the drawTransformed method.
-	*/
+     * Set the scale of the sprite to 's'. If s is 1
+	 * the sprite will be drawn at normal size. If 's'
+	 * is 0.5 it will be drawn at half size. Note that
+	 * scaling and rotation are only applied when
+	 * using the drawTransformed method.
+	 */
     public void setScaleX(float x)
     {
     	scaleX = x;
@@ -277,9 +277,9 @@ public class Sprite {
     public void setScaleY(float y) { scaleY = y; }
 
     /**
-		Get the current value of the scaling attribute.
-		See 'setScale' for more information.
-	*/
+     * Get the current value of the scaling attribute.
+     * See 'setScale' for more information.
+	 */
     public double getScaleX()
     {
     	return scaleX;
@@ -290,27 +290,27 @@ public class Sprite {
         return scaleY;
     }
 	/**
-		Set the rotation angle for the sprite in degrees.
-		Note that scaling and rotation are only applied when
-		using the drawTransformed method.
-	*/
+	 * Set the rotation angle for the sprite in degrees.
+	 * Note that scaling and rotation are only applied when
+     * using the drawTransformed method.
+	 */
     public void setRotation(double r)
     {
     	rotation = Math.toRadians(r);
     }
 
 	/**
-		Get the current value of the rotation attribute.
-		in degrees. See 'setRotation' for more information.
-	*/
+     * Get the current value of the rotation attribute.
+     * in degrees. See 'setRotation' for more information.
+	 */
     public double getRotation()
     {
     	return Math.toDegrees(rotation);
     }
 
     /**
-     	Stops the sprites movement at the current position
-    */
+     * Stops the sprites movement at the current position
+     */
     public void stop()
     {
     	dx = 0;
@@ -318,17 +318,17 @@ public class Sprite {
     }
 
     /**
-        Gets this Sprite's current image.
-    */
+     * Gets this Sprite's current image.
+     */
     public Image getImage() {
         return anim.getImage();
     }
 
 	/**
-		Draws the sprite with the graphics object 'g' at
-		the current x and y co-ordinates. Scaling and rotation
-		transforms are NOT applied.
-	*/
+     * Draws the sprite with the graphics object 'g' at
+     * the current x and y co-ordinates. Scaling and rotation
+     * transforms are NOT applied.
+	 */
     public void draw(Graphics2D g)
     {
     	if (!render) return;
@@ -337,9 +337,9 @@ public class Sprite {
     }
 
     /**
-		Draws the bounding box of this sprite using the graphics object 'g' and
-		the currently selected foreground colour.
-	*/
+     * Draws the bounding box of this sprite using the graphics object 'g' and
+     * the currently selected foreground colour.
+	 */
     public void drawBoundingBox(Graphics2D g)
     {
     	if (!render) return;
@@ -349,9 +349,9 @@ public class Sprite {
     }
     
     /**
-		Draws the bounding circle of this sprite using the graphics object 'g' and
-		the currently selected foreground colour.
-	*/
+     * Draws the bounding circle of this sprite using the graphics object 'g' and
+     * the currently selected foreground colour.
+	 */
     public void drawBoundingCircle(Graphics2D g)
     {
     	if (!render) return;
@@ -362,12 +362,12 @@ public class Sprite {
     }
     
 	/**
-		Draws the sprite with the graphics object 'g' at
-		the current x and y co-ordinates with the current scaling
-		and rotation transforms applied.
-		
-		@param g The graphics object to draw to,
-	*/
+     * Draws the sprite with the graphics object 'g' at
+     * the current x and y co-ordinates with the current scaling
+     * and rotation transforms applied.
+     *
+     * @param g The graphics object to draw to,
+	 */
     public void drawTransformed(Graphics2D g)
     {
     	if (!render) return;
@@ -382,25 +382,25 @@ public class Sprite {
 
 
 	/**
-		Hide the sprite.
-	*/
+     * Hide the sprite.
+	 */
     public void hide()  {	render = false;  }
 
 	/**
-		Show the sprite
-	*/
+     * Show the sprite.
+	 */
     public void show()  {  	render = true;   }
 
 	/**
-		Check the visibility status of the sprite.
-	*/
+     * Check the visibility status of the sprite.
+	 */
     public boolean isVisible() { return render; }
 
 	/**
-		Set an x & y offset to use when drawing the sprite.
-		Note this does not affect its actual position, just
-		moves the drawn position.
-	*/
+     * Set an x & y offset to use when drawing the sprite.
+     * Note this does not affect its actual position, just
+     * moves the drawn position.
+	 */
     public void setOffsets(int x, int y)
     {
     	xoff = x;
@@ -408,16 +408,16 @@ public class Sprite {
     }
 
     /**
-        Set the value of the boolean tracking whether the
-        sprite is touching the ground to g.
+     * Set the value of the boolean tracking whether the
+     * sprite is touching the ground to g.
      */
     public void setGrounded(boolean g){
         ground = g;
     }
 
     /**
-        Returns the value of the boolean tracking whether the
-        sprite is touching the ground.
+     * Returns the value of the boolean tracking whether the
+     * sprite is touching the ground.
      */
     public boolean isGrounded(){
         return ground;
