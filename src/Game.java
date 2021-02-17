@@ -29,11 +29,13 @@ public class Game extends GameCore
 	static int screenWidth = 1024;
 	static int screenHeight = 768;
 
-    float 	lift = 0.005f;
-    float	gravity = 0.0001f;
+    float 	lift = 0.025f;
+    float	gravity = 0.0005f;
     
     // Game state flags
-    boolean flap = false, left = false, right = false;
+    boolean flap = false;
+
+    int xo = 0, yo = 0;
 
     // Game resources
     Animation landing;
@@ -80,7 +82,7 @@ public class Game extends GameCore
         // rearrange to give the illusion of motion
         
         landing = new Animation();
-        landing.loadAnimationFromSheet("images/idle.png", 4, 1, 60);
+        landing.loadAnimationFromSheet("images/idle.png", 4, 1, 250);
         
         // Initialise the player with an animation
         player = new Sprite(landing);
@@ -132,8 +134,6 @@ public class Game extends GameCore
 
     	// First work out how much we need to shift the view 
     	// in order to see where the player is.
-        int xo = 0;
-        int yo = 0;
 
         // If relative, adjust the offset so that
         // it is relative to the player
@@ -250,15 +250,16 @@ public class Game extends GameCore
     	}
 
         if (key == KeyEvent.VK_D) {
-            player.setVelocityX(0.1f);
+            player.setVelocityX(0.075f);
             player.setScaleX(-1);
         }
         else if (key == KeyEvent.VK_A) {
-            player.setVelocityX(-0.1f);
+            player.setVelocityX(-0.075f);
             player.setScaleX(1);
         }
         if (key == KeyEvent.VK_SPACE && player.isGrounded()){
             gravity = -gravity;
+            player.setScaleY((float)-player.getScaleY());
             player.setGrounded(false);
         }
     }
@@ -310,18 +311,29 @@ public class Game extends GameCore
 
         if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
             if (TL != '.' || TR != '.'){
-                if (gravity < 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) || sy >= tmap.getTileYC(BLxtile, BLytile))){
-                    System.out.println(tmap.getTileYC(BLxtile, BLytile));
+                if (gravity < 0 && (sy <= tmap.getTileYC(TLxtile, TLytile) + tileHeight|| sy <= tmap.getTileYC(TRxtile, TRytile) + tileHeight)) {
                     s.setGrounded(true);
-                    System.out.println("collision");
+                    float i = Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight);
+                    if (i > sy){
+                        s.setY(Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight));
+                    }
+                }
+                if (sx < tmap.getTileXC(TLxtile, TLytile) + tileWidth) {
+                    s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+                }
+                else if (sx > tmap.getTileXC(TRxtile, TRytile) - s.getWidth()){
+//                    s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+                    System.out.println("collide");
                 }
             }
             if (BL != '.' || BR != '.'){
-                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight)){
-                    System.out.println(tmap.getTileYC(BLxtile, BLytile));
+                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BRxtile, BRytile) - tileHeight)) {
                     s.setGrounded(true);
-                    System.out.println("collision");
+                    if (Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) < sy + s.getHeight()) {
+                        s.setY(Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) - s.getHeight());
+                    }
                 }
+
             }
         }
         else {

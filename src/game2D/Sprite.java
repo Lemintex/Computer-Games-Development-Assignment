@@ -272,9 +272,20 @@ public class Sprite {
     public void setScaleX(float x)
     {
     	scaleX = x;
+    	xoff = 0;
+        if (getScaleX() < 0){
+            xoff = getWidth();
+        }
     }
 
-    public void setScaleY(float y) { scaleY = y; }
+    public void setScaleY(float y)
+    {
+        scaleY = y;
+        yoff = 0;
+        if (getScaleY() < 0){
+            yoff = getHeight();
+        }
+    }
 
     /**
      * Get the current value of the scaling attribute.
@@ -285,10 +296,10 @@ public class Sprite {
     	return scaleX;
     }
 
-    public double getScale()
-    {
+    public double getScaleY() {
         return scaleY;
     }
+
 	/**
 	 * Set the rotation angle for the sprite in degrees.
 	 * Note that scaling and rotation are only applied when
@@ -371,10 +382,10 @@ public class Sprite {
     public void drawTransformed(Graphics2D g)
     {
     	if (!render) return;
-
+        double transX = x + xoff, transY = y + yoff;
 		AffineTransform transform = new AffineTransform();
-		transform.translate(Math.round(x)+xoff,Math.round(y)+yoff);
-		transform.scale(scaleX,scaleY);
+		transform.translate(transX, transY);
+        transform.scale(scaleX,scaleY);
 		transform.rotate(rotation,getImage().getWidth(null)/2,getImage().getHeight(null)/2);
 		// Apply transform to the image and draw it
 		g.drawImage(getImage(),transform,null);
@@ -403,13 +414,21 @@ public class Sprite {
 	 */
     public void setOffsets(int x, int y)
     {
-    	xoff = x;
-    	yoff = y;
+        xoff = x;
+        if (getScaleX() < 0){
+            xoff = x + getWidth();
+        }
+        yoff = y;
+        if (getScaleY() < 0){
+            yoff = y + getHeight();
+        }
     }
 
     /**
      * Set the value of the boolean tracking whether the
      * sprite is touching the ground to g.
+     *
+     * @param g if the sprite is touching the ground.
      */
     public void setGrounded(boolean g){
         ground = g;
@@ -418,9 +437,17 @@ public class Sprite {
     /**
      * Returns the value of the boolean tracking whether the
      * sprite is touching the ground.
+     *
+     * @return A reference to if the sprite is touching the ground
      */
     public boolean isGrounded(){
         return ground;
+    }
+
+    public void flipSprite(){
+        if (scaleX > 0){
+
+        }
     }
 
 }

@@ -1,16 +1,16 @@
 package game2D;
 
 /**
-	The Velocity class provides the ability to manipulate and specify a
-	Velocity as a speed and direction. Using this class, you can
-	create a velocity object with a particular speed and direction and
-	then query the object to find our what the corresponding change in
-	vertical and horizontal pixels per millisecond should be. These
-	queries are achieved using the methods 'getdx' and 'getdy'.
-	respectively.
-	
-	@author David Cairns
-*/
+ * The Velocity class provides the ability to manipulate and specify a
+ * Velocity as a speed and direction. Using this class, you can
+ * create a velocity object with a particular speed and direction and
+ * then query the object to find our what the corresponding change in
+ * vertical and horizontal pixels per millisecond should be. These
+ * queries are achieved using the methods 'getdx' and 'getdy'.
+ * respectively.
+ *
+ * @author David Cairns
+ */
 public class Velocity {
 
 	private	double angle;	// Angle of velocity in radians
@@ -21,9 +21,9 @@ public class Velocity {
 	private double dy;
 
 	/**
-		Initialise a default velocity with 0 speed and an
-		angle of 0 degrees.
-	*/
+	 * Initialise a default velocity with 0 speed and an
+	 * angle of 0 degrees.
+	 */
 	public Velocity()
 	{
 		dx = 0.0f;
@@ -34,9 +34,9 @@ public class Velocity {
 	}
 
 	/**
-		Initialise a default velocity with a speed of 's' and an
-		angle of 'a' degrees.
-	*/
+	 * Initialise a default velocity with a speed of 's' and an
+	 * angle of 'a' degrees.
+ 	 */
 	public Velocity(double s, double a)
 	{
 		dx = 0.0f;
