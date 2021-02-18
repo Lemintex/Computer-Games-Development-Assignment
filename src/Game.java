@@ -30,11 +30,7 @@ public class Game extends GameCore
 	static int screenHeight = 768;
 
     float 	lift = 0.025f;
-    float	gravity = 0.0005f;
-    
-    // Game state flags
-    boolean flap = false;
-
+    float	gravity = 0.00005f;
     int xo = 0, yo = 0;
 
     // Game resources
@@ -117,7 +113,7 @@ public class Game extends GameCore
     public void initialiseGame()
     {
     	total = 0;
-        player.setX(64);
+        player.setX(100);
         player.setY(600);
         player.setVelocityX(0);
         player.setVelocityY(0);
@@ -174,12 +170,7 @@ public class Game extends GameCore
     public void update(long elapsed)
     {
        	player.setAnimationSpeed(1.0f);
-       	
-       	if (flap) 
-       	{
-       		player.setAnimationSpeed(1.8f);
-       		player.setVelocityY(-0.04f);
-       	}
+
        	for (LinkedList<Sprite> l : backgroundList){
        	    for (Sprite s : l){
        	        s.update(elapsed);
@@ -240,8 +231,8 @@ public class Game extends GameCore
     	
     	if (key == KeyEvent.VK_ESCAPE) stop();
     	
-    	if (key == KeyEvent.VK_UP) flap = true;
-    	   	
+    	if (key == KeyEvent.VK_UP)
+
     	if (key == KeyEvent.VK_S)
     	{
     		// Example of playing a sound as a thread
@@ -250,11 +241,11 @@ public class Game extends GameCore
     	}
 
         if (key == KeyEvent.VK_D) {
-            player.setVelocityX(0.075f);
+            player.setVelocityX(0.175f);
             player.setScaleX(-1);
         }
         else if (key == KeyEvent.VK_A) {
-            player.setVelocityX(-0.075f);
+            player.setVelocityX(-0.175f);
             player.setScaleX(1);
         }
         if (key == KeyEvent.VK_SPACE && player.isGrounded()){
@@ -284,7 +275,8 @@ public class Game extends GameCore
     	// Take a note of a sprite's current position
     	float sx = s.getX();
     	float sy = s.getY();
-    	
+
+    	float velX = s.getVelocityX();
     	// Find out how wide and how tall a tile is
     	float tileWidth = tmap.getTileWidth();
     	float tileHeight = tmap.getTileHeight();
@@ -308,37 +300,98 @@ public class Game extends GameCore
         int BRxtile = (int)((sx + s.getWidth())/tileWidth);
         int BRytile = (int)((sy + s.getHeight())/tileHeight);
         BR = tmap.getTileChar(BRxtile, BRytile);
+        boolean moveX = true;
 
-        if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
-            if (TL != '.' || TR != '.'){
-                if (gravity < 0 && (sy <= tmap.getTileYC(TLxtile, TLytile) + tileHeight|| sy <= tmap.getTileYC(TRxtile, TRytile) + tileHeight)) {
-                    s.setGrounded(true);
-                    float i = Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight);
-                    if (i > sy){
-                        s.setY(Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight));
-                    }
-                }
-                if (sx < tmap.getTileXC(TLxtile, TLytile) + tileWidth) {
-                    s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
-                }
-                else if (sx > tmap.getTileXC(TRxtile, TRytile) - s.getWidth()){
-//                    s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
-                    System.out.println("collide");
-                }
+        if (spriteTileCollision(BL, BR, -sy - s.getHeight(), -tmap.getTileYC(BLxtile, BLytile), -tmap.getTileYC(BRxtile, BRytile))){
+            if (gravity > 0 && !s.isGrounded()){
+                s.setGrounded(true);
             }
-            if (BL != '.' || BR != '.'){
-                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BRxtile, BRytile) - tileHeight)) {
-                    s.setGrounded(true);
-                    if (Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) < sy + s.getHeight()) {
-                        s.setY(Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) - s.getHeight());
-                    }
-                }
-
+            if (BL != '.') {
+                s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+            }
+            else{
+                s.setY(tmap.getTileYC(BRxtile, BRytile) - s.getHeight());
             }
         }
-        else {
+        else if (spriteTileCollision(TL, TR, sy - tileWidth, tmap.getTileYC(TLxtile, TLytile), tmap.getTileYC(TRxtile, TRytile))){
+            if (gravity < 0 && !s.isGrounded()){
+                s.setGrounded(true);
+            }
+            if (TL != '.') {
+                s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
+            }
+            else{
+                s.setY(tmap.getTileYC(TRxtile, TRytile) + tileHeight);
+            }
+        }else if (spriteTileCollision(TL, BL, -sx - tileWidth, -tmap.getTileXC(TLxtile, TLytile), -tmap.getTileXC(BLxtile, BLytile))){
+            if (TL != '.') {
+                s.setX(tmap.getTileXC(TLxtile, TLytile));
+            }
+            else{
+                s.setX(tmap.getTileXC(BLxtile, BLytile));
+            }
+        }
+
+        else{
             s.setGrounded(false);
         }
+//        if (spriteTileCollision(TL, sx, tmap.getTileXC(TLxtile, TLytile) + tileWidth)){
+//            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+//            moveX = false;
+//            System.out.println("TL");
+//        }
+//        if (spriteTileCollision(BR, -sx - s.getWidth(), -tmap.getTileXC(BRxtile, BRytile))){
+//            s.setX(tmap.getTileXC(BRxtile, BRytile) - s.getWidth());
+//            moveX = false;
+//            System.out.println("BR");
+//        }
+//        if (spriteTileCollision(TR, -sx - s.getWidth(), -tmap.getTileXC(TRxtile, TRytile))){
+//            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+//            moveX = false;
+//            System.out.println("TR");
+//        }
+//        if (!moveX){
+//            s.setVelocityX(0);
+//        }
+//        else {
+//            s.setVelocityX(velX);
+//        }
+//        if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
+//            if (TL != '.' || TR != '.'){
+//                if (gravity < 0 && (sy <= tmap.getTileYC(TLxtile, TLytile) + tileHeight|| sy <= tmap.getTileYC(TRxtile, TRytile) + tileHeight)) {
+//                    s.setGrounded(true);
+//                    if (Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight) > sy){
+//                        s.setY(Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight));
+//                    }
+//                }
+//                if (sx < tmap.getTileXC(TLxtile, TLytile) + tileWidth) {
+//                    s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+//                }
+//                else if (sx > tmap.getTileXC(TRxtile, TRytile) - s.getWidth()){
+//                    s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+//                    System.out.println("collide");
+//                }
+//            }
+//            if (BL != '.' || BR != '.'){
+//                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BRxtile, BRytile) - tileHeight)) {
+//                    s.setGrounded(true);
+//                    if (Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) < sy + s.getHeight()) {
+//                        s.setY(Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) - s.getHeight());
+//                    }
+//                }
+//
+//            }
+//        }
+//        else {
+//            s.setGrounded(false);
+//        }
+    }
+
+    public boolean spriteTileCollision(char tile1Char, char tile2Char, float spriteCompare, float tile1Compare, float tile2Compare){
+        if ((tile1Char != '.' || tile2Char !='.') && (spriteCompare < tile1Compare || spriteCompare < tile2Compare)){
+                return true;
+            }
+        return false;
     }
 
 	public void keyReleased(KeyEvent e) { 
@@ -349,7 +402,6 @@ public class Game extends GameCore
 		{
 			case KeyEvent.VK_ESCAPE: stop(); break;
 			case KeyEvent.VK_UP: {
-                flap = false;
                 break;
             }
             case KeyEvent.VK_D:
