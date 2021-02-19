@@ -432,6 +432,9 @@ public class Sprite {
      */
     public void setGrounded(boolean g){
         ground = g;
+        if (ground){
+            this.dy = 0;
+        }
     }
 
     /**

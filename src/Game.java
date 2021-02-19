@@ -185,13 +185,12 @@ public class Game extends GameCore
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
-        if (!player.isGrounded()) {
+//        if (!player.isGrounded()) {
             player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
-        }
-        else{
-            player.setVelocityY(0);
-        }
-
+//        }
+//        else{
+//            player.setVelocityY(0);
+//        }
     }
     
     
@@ -253,6 +252,9 @@ public class Game extends GameCore
             player.setScaleY((float)-player.getScaleY());
             player.setGrounded(false);
         }
+        if (key == KeyEvent.VK_R){
+            initialiseGame();
+        }
     }
 
     public boolean boundingBoxCollision(Sprite s1, Sprite s2)
@@ -268,133 +270,62 @@ public class Game extends GameCore
      * @param tmap		The tile map to check 
      */
 
-    public void checkTileCollision(Sprite s, TileMap tmap)
-    {
+    public void checkTileCollision(Sprite s, TileMap tmap) {
         char TL, BL, TR, BR;
 
-    	// Take a note of a sprite's current position
-    	float sx = s.getX();
-    	float sy = s.getY();
+        // Take a note of a sprite's current position
+        int sx = (int) s.getX();
+        int sy = (int) s.getY();
 
-    	float velX = s.getVelocityX();
-    	// Find out how wide and how tall a tile is
-    	float tileWidth = tmap.getTileWidth();
-    	float tileHeight = tmap.getTileHeight();
-    	
-    	//TOP LEFT
-    	int	TLxtile = (int)(sx / tileWidth);
-    	int TLytile = (int)(sy / tileHeight);
-    	TL = tmap.getTileChar(TLxtile, TLytile);
+        float velX = s.getVelocityX();
+        // Find out how wide and how tall a tile is
+        float tileWidth = tmap.getTileWidth();
+        float tileHeight = tmap.getTileHeight();
 
-    	//BOTTOM LEFT
-        int BLxtile = (int)(sx / tileWidth);
-    	int BLytile = (int)((sy + s.getHeight())/ tileHeight);
-    	BL = tmap.getTileChar(BLxtile, BLytile);
+        //TOP LEFT
+        int TLxtile = (int) (sx / tileWidth);
+        int TLytile = (int) (sy / tileHeight);
+        TL = tmap.getTileChar(TLxtile, TLytile);
 
-    	//TOP RIGHT
-     	int TRxtile = (int)((sx + s.getWidth())/tileWidth);
-     	int TRytile = (int)(sy/tileHeight);
-     	TR = tmap.getTileChar(TRxtile, TRytile);
+        //BOTTOM LEFT
+        int BLxtile = (int) (sx / tileWidth);
+        int BLytile = (int) ((sy + s.getHeight()) / tileHeight);
+        BL = tmap.getTileChar(BLxtile, BLytile);
+
+        //TOP RIGHT
+        int TRxtile = (int) ((sx + s.getWidth()) / tileWidth);
+        int TRytile = (int) (sy / tileHeight);
+        TR = tmap.getTileChar(TRxtile, TRytile);
 
         //BOTTOM RIGHT
-        int BRxtile = (int)((sx + s.getWidth())/tileWidth);
-        int BRytile = (int)((sy + s.getHeight())/tileHeight);
+        int BRxtile = (int) ((sx + s.getWidth()) / tileWidth);
+        int BRytile = (int) ((sy + s.getHeight()) / tileHeight);
         BR = tmap.getTileChar(BRxtile, BRytile);
-        boolean moveX = true;
-
-        if (spriteTileCollision(BL, BR, -sy - s.getHeight(), -tmap.getTileYC(BLxtile, BLytile), -tmap.getTileYC(BRxtile, BRytile))){
-            if (gravity > 0 && !s.isGrounded()){
-                s.setGrounded(true);
-            }
-            if (BL != '.') {
-                s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
-            }
-            else{
-                s.setY(tmap.getTileYC(BRxtile, BRytile) - s.getHeight());
-            }
+        boolean ground = false;
+        if ((BL != '.' && tmap.getTileYC(BLxtile, BLytile) < sy + s.getHeight()) || (BR != '.' && tmap.getTileYC(BRxtile, BRytile) < sy + s.getHeight())) {
+            System.out.println("ground");
+            s.setVelocityY(0);
+            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
         }
-        else if (spriteTileCollision(TL, TR, sy - tileWidth, tmap.getTileYC(TLxtile, TLytile), tmap.getTileYC(TRxtile, TRytile))){
-            if (gravity < 0 && !s.isGrounded()){
-                s.setGrounded(true);
-            }
-            if (TL != '.') {
-                s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
-            }
-            else{
-                s.setY(tmap.getTileYC(TRxtile, TRytile) + tileHeight);
-            }
-        }else if (spriteTileCollision(TL, BL, -sx - tileWidth, -tmap.getTileXC(TLxtile, TLytile), -tmap.getTileXC(BLxtile, BLytile))){
-            if (TL != '.') {
-                s.setX(tmap.getTileXC(TLxtile, TLytile));
-            }
-            else{
-                s.setX(tmap.getTileXC(BLxtile, BLytile));
-            }
+        int a = tmap.getTileYC(BLxtile, BLytile), b = (int) (sy + s.getHeight());
+        if (tmap.getTileXC(BLxtile, BLytile) + tileWidth > sx && a >= b) {
+//                System.out.println("BLwall");
+//                s.setVelocityX(0);
+//                s.setX(tmap.getTileXC(BLxtile, BLytile) + tileWidth);
         }
-
-        else{
-            s.setGrounded(false);
+        if ((TL != '.' && tmap.getTileYC(TLxtile, TLytile) > sy) || (TR != '.' && tmap.getTileYC(TRxtile, TRytile) + tileHeight > sy)) {
+            s.setVelocityY(0);
+            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
+            System.out.println("ceiling");
         }
-//        if (spriteTileCollision(TL, sx, tmap.getTileXC(TLxtile, TLytile) + tileWidth)){
-//            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
-//            moveX = false;
-//            System.out.println("TL");
-//        }
-//        if (spriteTileCollision(BR, -sx - s.getWidth(), -tmap.getTileXC(BRxtile, BRytile))){
-//            s.setX(tmap.getTileXC(BRxtile, BRytile) - s.getWidth());
-//            moveX = false;
-//            System.out.println("BR");
-//        }
-//        if (spriteTileCollision(TR, -sx - s.getWidth(), -tmap.getTileXC(TRxtile, TRytile))){
-//            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
-//            moveX = false;
-//            System.out.println("TR");
-//        }
-//        if (!moveX){
+        if ((TL != '.' && tmap.getTileXC(TLxtile, TLytile) + tileWidth > sx) || (BL != '.' && tmap.getTileXC(BLxtile, BLytile) + tileWidth > sx)) {
+            System.out.println("Lwall");
 //            s.setVelocityX(0);
-//        }
-//        else {
-//            s.setVelocityX(velX);
-//        }
-//        if (BL != '.' || BR != '.' || TL != '.' || TR != '.') {
-//            if (TL != '.' || TR != '.'){
-//                if (gravity < 0 && (sy <= tmap.getTileYC(TLxtile, TLytile) + tileHeight|| sy <= tmap.getTileYC(TRxtile, TRytile) + tileHeight)) {
-//                    s.setGrounded(true);
-//                    if (Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight) > sy){
-//                        s.setY(Math.max(tmap.getTileYC(TLxtile, TLytile) + tileHeight, tmap.getTileYC(TRxtile, TRytile) + tileHeight));
-//                    }
-//                }
-//                if (sx < tmap.getTileXC(TLxtile, TLytile) + tileWidth) {
-//                    s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
-//                }
-//                else if (sx > tmap.getTileXC(TRxtile, TRytile) - s.getWidth()){
-//                    s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
-//                    System.out.println("collide");
-//                }
-//            }
-//            if (BL != '.' || BR != '.'){
-//                if (gravity > 0 && (sy >= tmap.getTileYC(BLxtile, BLytile) - tileHeight || sy >= tmap.getTileYC(BRxtile, BRytile) - tileHeight)) {
-//                    s.setGrounded(true);
-//                    if (Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) < sy + s.getHeight()) {
-//                        s.setY(Math.min(tmap.getTileYC(BLxtile, BLytile), tmap.getTileYC(BRxtile, BRytile)) - s.getHeight());
-//                    }
-//                }
-//
-//            }
-//        }
-//        else {
-//            s.setGrounded(false);
-//        }
+//            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+        }
     }
 
-    public boolean spriteTileCollision(char tile1Char, char tile2Char, float spriteCompare, float tile1Compare, float tile2Compare){
-        if ((tile1Char != '.' || tile2Char !='.') && (spriteCompare < tile1Compare || spriteCompare < tile2Compare)){
-                return true;
-            }
-        return false;
-    }
-
-	public void keyReleased(KeyEvent e) { 
+	public void keyReleased(KeyEvent e) {
 		int key = e.getKeyCode();
 		// Switch statement instead of lots of ifs...
 		// Need to use break to prevent fall through.
