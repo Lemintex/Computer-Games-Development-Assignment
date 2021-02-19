@@ -301,27 +301,57 @@ public class Game extends GameCore
         int BRxtile = (int) ((sx + s.getWidth()) / tileWidth);
         int BRytile = (int) ((sy + s.getHeight()) / tileHeight);
         BR = tmap.getTileChar(BRxtile, BRytile);
-        boolean ground = false;
-        if ((BL != '.' && tmap.getTileYC(BLxtile, BLytile) < sy + s.getHeight()) || (BR != '.' && tmap.getTileYC(BRxtile, BRytile) < sy + s.getHeight())) {
+        boolean ground = false, ceiling = false, leftWall = false, rightWall = false;
+        s.setGrounded(false);
+        if ((BL != '.' && tmap.getTileYC(BLxtile, BLytile) <= sy + s.getHeight() && TL == '.') || (BR != '.' && tmap.getTileYC(BRxtile, BRytile) <= sy + s.getHeight() && TR == '.')) {
+            ground = true;
+            if (gravity > 0){
+                s.setGrounded(true);
+            }
             System.out.println("ground");
             s.setVelocityY(0);
-            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+            if (BL == '.') {
+                s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+            }
+            else if (BR == '.'){
+                s.setY(tmap.getTileYC(BRxtile, BRytile) - s.getHeight());
+            }
         }
-        int a = tmap.getTileYC(BLxtile, BLytile), b = (int) (sy + s.getHeight());
-        if (tmap.getTileXC(BLxtile, BLytile) + tileWidth > sx && a >= b) {
-//                System.out.println("BLwall");
-//                s.setVelocityX(0);
-//                s.setX(tmap.getTileXC(BLxtile, BLytile) + tileWidth);
-        }
-        if ((TL != '.' && tmap.getTileYC(TLxtile, TLytile) > sy) || (TR != '.' && tmap.getTileYC(TRxtile, TRytile) + tileHeight > sy)) {
+        if ((TL != '.' && tmap.getTileYC(TLxtile, TLytile) > sy && BL == '.') || (TR != '.' && tmap.getTileYC(TRxtile, TRytile) + tileHeight > sy && BR == '.')) {
+            ceiling = true;
+            if (gravity <0){
+                s.setGrounded(true);
+            }
             s.setVelocityY(0);
-            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
+            if (TL == '.') {
+                s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
+            }
+            else {
+                s.setY(tmap.getTileYC(TRxtile, TRytile) + tileHeight);
+            }
             System.out.println("ceiling");
         }
-        if ((TL != '.' && tmap.getTileXC(TLxtile, TLytile) + tileWidth > sx) || (BL != '.' && tmap.getTileXC(BLxtile, BLytile) + tileWidth > sx)) {
+        if ((TL != '.' && tmap.getTileXC(TLxtile, TLytile) + tileWidth > sx && !ceiling) || (BL != '.' && tmap.getTileXC(BLxtile, BLytile) + tileWidth > sx && !ground)){
+            leftWall = true;
             System.out.println("Lwall");
-//            s.setVelocityX(0);
-//            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+            s.setVelocityX(0);
+            if (TL == '.'){
+                s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+            }
+            else {
+                s.setX(tmap.getTileXC(BLxtile, BLytile) + tileWidth);
+            }
+        }
+        if ((TR != '.' && tmap.getTileXC(TRxtile, TRytile) < sx + s.getWidth() && !ceiling) || (BR != '.' && tmap.getTileXC(BRxtile, BRytile) < sx + s.getWidth() && !ground)){
+            rightWall = true;
+            System.out.println("Rwall");
+            s.setVelocityX(0);
+            if (TR == '.'){
+                s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+            }
+            else{
+                s.setX(tmap.getTileXC(BRxtile, BRytile) - s.getWidth());
+            }
         }
     }
 
