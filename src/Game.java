@@ -178,14 +178,14 @@ public class Game extends GameCore
         }
        	for (Sprite s: clouds)
        		s.update(elapsed);
-
+        player.update(elapsed);
+        
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
 
         // Now update the sprites animation and position
-        player.update(elapsed);
-       
+
 
 //        if (!player.isGrounded()) {
             player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
@@ -278,93 +278,73 @@ public class Game extends GameCore
         float sy = s.getY();
         int swidth = s.getWidth();
         int sheight = s.getHeight();
+        float sxmid = sx + swidth/2;
+        float symid = sy + sheight/2;	
         // Find out how wide and how tall a tile is
         float tileWidth = tmap.getTileWidth();
         float tileHeight = tmap.getTileHeight();
 
         //TOP RIGHT
-        int TRxtile = (int) ((s.getX() + s.getWidth()) / tileWidth);
-        int TRytile = (int) (s.getY() / tileHeight);
+        int TRxtile = (int) ((sx + swidth) / tileWidth);
+        int TRytile = (int) (sy / tileHeight);
         int TRXmid = (int) (tmap.getTileXC(TRxtile, TRytile) + tileWidth/2);
         int TRYmid = (int) (tmap.getTileYC(TRxtile, TRytile) + tileHeight/2);
         TR = tmap.getTileChar(TRxtile, TRytile);
 
         //BOTTOM RIGHT
-        int BRxtile = (int) ((s.getX() + s.getWidth()) / tileWidth);
-        int BRytile = (int) ((s.getY() + s.getHeight()) / tileHeight);
+        int BRxtile = (int) ((sx + swidth) / tileWidth);
+        int BRytile = (int) ((sy + sheight) / tileHeight);
         int BRXmid = (int) (tmap.getTileXC(BRxtile, BRytile) + tileWidth/2);
         int BRYmid = (int) (tmap.getTileYC(BRxtile, BRytile) + tileHeight/2);
         BR = tmap.getTileChar(BRxtile, BRytile);
 
         //TOP LEFT
-        int TLxtile = (int) (s.getX() / tileWidth);
-        int TLytile = (int) (s.getY() / tileHeight);
+        int TLxtile = (int) (sx / tileWidth);
+        int TLytile = (int) (sy / tileHeight);
         int TLXmid = (int) (tmap.getTileXC(TLxtile, TLytile) + tileWidth/2);
         int TLYmid = (int) (tmap.getTileYC(TLxtile, TLytile) + tileHeight/2);
         TL = tmap.getTileChar(TLxtile, TLytile);
 
         //BOTTOM LEFT
-        int BLxtile = (int) (s.getX() / tileWidth);
-        int BLytile = (int) ((s.getY() + s.getHeight()) / tileHeight);
+        int BLxtile = (int) (sx / tileWidth);
+        int BLytile = (int) ((sy + sheight) / tileHeight);
         int BLXmid = (int) (tmap.getTileXC(BLxtile, BLytile) + tileWidth/2);
         int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight/2);
         BL = tmap.getTileChar(BLxtile, BLytile);
 
-        boolean ground = false, ceiling = false, leftWall = false, rightWall = false;
-
-        if ((TR != '.' && TRXmid - sx - swidth > TRYmid - sy) || (BR != '.' && BRXmid - sx - swidth > TRYmid - sy - swidth)) {
-            System.out.println("Rwall");
+        boolean leftWall = false, rightWall = false;
+//&& Math.abs(BRYmid - sy)>=tileHeight/2)
+        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid-symid)) || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid-symid)))) { //&& s.getVelocityX() > 0) {
             s.setVelocityX(0);
             s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+            rightWall = true;
         }
-        if ((TL != '.' && TLXmid - sx > TLYmid - sy) || (BL != '.' && BLXmid - sx > TLYmid - sy - swidth)){
+//        > Math.abs(TLYmid - sy)
+
+//        System.out.println(sx)
+        if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid-symid)) || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid-symid)))) { //&& s.getVelocityX()<0){
             System.out.println("Lwall");
             System.out.println(sx);
             s.setVelocityX(0);
             s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+            leftWall = true;
         }
-//        if ((BL != '.' || BR != '.') && s.getVelocityY()>0){
+        if (((BL != '.' && Math.abs(BLYmid - symid) > Math.abs(BLXmid-sxmid) && !leftWall) || (BR != '.' && Math.abs(BRYmid-symid) > Math.abs(BLXmid-sxmid) && !rightWall)) && s.getVelocityY()>0){
 //            ground = true;
-//            if (gravity > 0) {
-//                s.setGrounded(true);
-//            }
-//            System.out.println("ground");
-//            s.setVelocityY(0);
-//            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight()-1);
-//        }
-
-//        //TOP RIGHT
-//        TRxtile = (int) ((s.getX() + s.getWidth()) / tileWidth);
-//        TRytile = (int) (s.getY() / tileHeight);
-//        TR = tmap.getTileChar(TRxtile, TRytile);
-//
-//        //TOP LEFT
-//        TLxtile = (int) (s.getX() / tileWidth);
-//        TLytile = (int) (s.getY() / tileHeight);
-//        TL = tmap.getTileChar(TLxtile, TLytile);
-//        if ((TL != '.' || TR != '.') && s.getVelocityY()<0) {
-//            if (gravity < 0){
-//                s.setGrounded(true);
-//            }
-//            s.setVelocityY(0);
-//            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight + 1);
-//        }
-
-
-//        if (leftWall){
-//            s.setVelocityX(0);
-//            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
-//        }
-//        else if (rightWall){
-//            s.setVelocityX(0);
-//            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
-//        }
-//        if (ceiling){
-//
-//        }
-//        if (ground){
-//
-//        }
+            if (gravity > 0) {
+                s.setGrounded(true);
+            }
+            System.out.println("ground");
+            s.setVelocityY(0);
+            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+        }
+        if (((TL != '.' && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid) && !leftWall) || (TR != '.' && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid) && !rightWall)) && s.getVelocityY()<0) {
+            if (gravity < 0) {
+                s.setGrounded(true);
+            }
+            s.setVelocityY(0);
+            s.setY(tmap.getTileYC(TLxtile, TLytile)+tileWidth);
+        }
     }
 
 	public void keyReleased(KeyEvent e) {
