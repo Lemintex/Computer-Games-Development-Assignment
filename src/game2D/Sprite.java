@@ -432,9 +432,6 @@ public class Sprite {
      */
     public void setGrounded(boolean g){
         ground = g;
-        if (ground){
-            this.dy = 0;
-        }
     }
 
     /**
@@ -447,10 +444,15 @@ public class Sprite {
         return ground;
     }
 
-    public void flipSprite(){
-        if (scaleX > 0){
-
-        }
+    public void jump(float force, float gravity){
+            if (gravity > 0 && ground){
+                this.dy = -force;
+                ground = false;
+            }
+            else if (gravity < 0 && ground){
+                this.dy = force;
+                ground = false;
+            }
     }
 
 }

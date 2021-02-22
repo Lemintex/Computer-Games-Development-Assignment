@@ -29,12 +29,12 @@ public class Game extends GameCore
 	static int screenWidth = 1024;
 	static int screenHeight = 768;
 
-    float 	lift = 0.025f;
-    float	gravity = 0.0001f;
+	float jump = 0.3f;
+    float gravity = 0.0005f;
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation landing;
+    Animation playerIdle, playerRunning;
     
     Sprite	player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
@@ -71,17 +71,19 @@ public class Game extends GameCore
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt");
         
-        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight()+64);
+        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
         setVisible(true);
 
         // Create a set of background sprites that we can 
         // rearrange to give the illusion of motion
         
-        landing = new Animation();
-        landing.loadAnimationFromSheet("images/idle.png", 4, 1, 250);
-        
+        playerIdle = new Animation();
+        playerIdle.loadAnimationFromSheet("images/idle.png", 4, 1, 250);
+
+        playerRunning = new Animation();
+        playerRunning.loadAnimationFromSheet("images/run.png", 3, 2, 250);
         // Initialise the player with an animation
-        player = new Sprite(landing);
+        player = new Sprite(playerIdle);
 
         // Load a single cloud animation
         Animation ca = new Animation();
@@ -151,8 +153,7 @@ public class Game extends GameCore
         // Apply offsets to player and draw 
         player.setOffsets(xo, yo);
         player.drawTransformed(g);
-        player.drawBoundingBox(g);
-                
+
         // Apply offsets to tile map and draw  it
         tmap.draw(g,xo,yo);    
         
@@ -179,20 +180,17 @@ public class Game extends GameCore
        	for (Sprite s: clouds)
        		s.update(elapsed);
         player.update(elapsed);
-        
-        // Then check for any collisions that may have occurred
-        handleScreenEdge(player, tmap, elapsed);
-        checkTileCollision(player, tmap);
+        if (player.getVelocityX()!=0 && player.isGrounded()){
+            player.setAnimation(playerRunning);
+        }
 
         // Now update the sprites animation and position
 
+        player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
 
-//        if (!player.isGrounded()) {
-            player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
-//        }
-//        else{
-//            player.setVelocityY(0);
-//        }
+        // Then check for any collisions that may have occurred
+        handleScreenEdge(player, tmap, elapsed);
+        checkTileCollision(player, tmap);
     }
     
     
@@ -232,7 +230,9 @@ public class Game extends GameCore
     	
     	if (key == KeyEvent.VK_ESCAPE) stop();
     	
-    	if (key == KeyEvent.VK_UP)
+    	if (key == KeyEvent.VK_W){
+    	    player.jump(jump, gravity);
+    	}
 
     	if (key == KeyEvent.VK_S)
     	{
@@ -242,11 +242,11 @@ public class Game extends GameCore
     	}
 
         if (key == KeyEvent.VK_D) {
-            player.setVelocityX(0.175f);
+            player.setVelocityX(0.25f);
             player.setScaleX(-1);
         }
         else if (key == KeyEvent.VK_A) {
-            player.setVelocityX(-0.175f);
+            player.setVelocityX(-0.25f);
             player.setScaleX(1);
         }
         if (key == KeyEvent.VK_SPACE && player.isGrounded()){
@@ -312,38 +312,29 @@ public class Game extends GameCore
         int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight/2);
         BL = tmap.getTileChar(BLxtile, BLytile);
 
-        boolean leftWall = false, rightWall = false;
-//&& Math.abs(BRYmid - sy)>=tileHeight/2)
-        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid-symid)) || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid-symid)))) { //&& s.getVelocityX() > 0) {
-            s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
-            rightWall = true;
-        }
-//        > Math.abs(TLYmid - sy)
-
-//        System.out.println(sx)
-        if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid-symid)) || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid-symid)))) { //&& s.getVelocityX()<0){
-            System.out.println("Lwall");
-            System.out.println(sx);
-            s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
-            leftWall = true;
-        }
-        if (((BL != '.' && Math.abs(BLYmid - symid) > Math.abs(BLXmid-sxmid) && !leftWall) || (BR != '.' && Math.abs(BRYmid-symid) > Math.abs(BLXmid-sxmid) && !rightWall)) && s.getVelocityY()>0){
-//            ground = true;
+        s.setGrounded(false);
+        if (((BL != '.' && Math.abs(BLYmid - symid) > Math.abs(BLXmid-sxmid)/* && !leftWall*/) || (BR != '.' && Math.abs(BRYmid-symid) > Math.abs(BLXmid-sxmid)/* && !rightWall*/)) && s.getVelocityY()>0){
             if (gravity > 0) {
                 s.setGrounded(true);
             }
-            System.out.println("ground");
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
         }
-        if (((TL != '.' && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid) && !leftWall) || (TR != '.' && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid) && !rightWall)) && s.getVelocityY()<0) {
+        else if (((TL != '.' && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)/* && !leftWall*/) || (TR != '.' && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)/* && !rightWall*/)) && s.getVelocityY()<0) {
             if (gravity < 0) {
                 s.setGrounded(true);
             }
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(TLxtile, TLytile)+tileWidth);
+        }
+        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid-symid)) || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid-symid)))) { //&& s.getVelocityX() > 0) {
+            s.setVelocityX(0);
+            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
+        }
+
+        else if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid-symid)) || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid-symid)))) { //&& s.getVelocityX()<0){
+            s.setVelocityX(0);
+            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
         }
     }
 
@@ -354,7 +345,7 @@ public class Game extends GameCore
 		switch (key)
 		{
 			case KeyEvent.VK_ESCAPE: stop(); break;
-			case KeyEvent.VK_UP: {
+			case KeyEvent.VK_W: {
                 break;
             }
             case KeyEvent.VK_D:
