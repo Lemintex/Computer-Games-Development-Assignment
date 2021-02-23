@@ -25,8 +25,9 @@ public class Sprite {
     private float height, width, radius;
 
     //Sprite touching ground
-    boolean ground;
+    private boolean ground;
 
+    private boolean horiz;
     // The scale to draw the sprite at where 1 equals normal size
     private double scaleX, scaleY;
     // The rotation to apply to the sprite image

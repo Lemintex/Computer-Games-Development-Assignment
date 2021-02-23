@@ -81,7 +81,7 @@ public class Game extends GameCore
         playerIdle.loadAnimationFromSheet("images/idle.png", 4, 1, 250);
 
         playerRunning = new Animation();
-        playerRunning.loadAnimationFromSheet("images/run.png", 3, 2, 250);
+        playerRunning.loadAnimationFromSheet("images/run.png", 3, 2, 150);
         // Initialise the player with an animation
         player = new Sprite(playerIdle);
 
@@ -139,6 +139,10 @@ public class Game extends GameCore
         if (player.getX() >= 250){
             xo = 250 - (int)player.getX();
         }
+        else
+        {
+            xo = 0;
+        }
         drawParallaxSprites(g, backgroundList);
 //        g.setColor(Color.white);
 //        g.fillRect(0, 0, getWidth(), getHeight());
@@ -170,6 +174,7 @@ public class Game extends GameCore
      */    
     public void update(long elapsed)
     {
+        player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
        	player.setAnimationSpeed(1.0f);
 
        	for (LinkedList<Sprite> l : backgroundList){
@@ -179,14 +184,16 @@ public class Game extends GameCore
         }
        	for (Sprite s: clouds)
        		s.update(elapsed);
-        player.update(elapsed);
-        if (player.getVelocityX()!=0 && player.isGrounded()){
+        if (player.getVelocityX()==0 && player.isGrounded()){
+            player.setAnimation(playerIdle);
+        }
+        else {
             player.setAnimation(playerRunning);
         }
 
-        // Now update the sprites animation and position
 
-        player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
+        // Now update the sprites animation and position
+        player.update(elapsed);
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
@@ -209,10 +216,7 @@ public class Game extends GameCore
         if (s.getY() + s.getHeight() > tmap.getPixelHeight())
         {
         	// Put the player back on the map 1 pixel above the bottom
-        	s.setY(tmap.getPixelHeight() - s.getHeight() - 1); 
-        	
-        	// and make them bounce
-        	s.setVelocityY(-s.getVelocityY());
+            initialiseGame();
         }
     }
     
@@ -227,36 +231,38 @@ public class Game extends GameCore
     public void keyPressed(KeyEvent e) 
     { 
     	int key = e.getKeyCode();
-    	
-    	if (key == KeyEvent.VK_ESCAPE) stop();
-    	
-    	if (key == KeyEvent.VK_W){
-    	    player.jump(jump, gravity);
-    	}
-
-    	if (key == KeyEvent.VK_S)
-    	{
-    		// Example of playing a sound as a thread
-    	//	Sound s = new Sound("sounds/caw.wav");
-    	//	s.start();
-    	}
-
-        if (key == KeyEvent.VK_D) {
-            player.setVelocityX(0.25f);
-            player.setScaleX(-1);
-        }
-        else if (key == KeyEvent.VK_A) {
-            player.setVelocityX(-0.25f);
-            player.setScaleX(1);
-        }
-        if (key == KeyEvent.VK_SPACE) {// && player.isGrounded()){
-            if (player.isGrounded()) {
-                gravity = -gravity;
-                player.setScaleY((float) -player.getScaleY());
+        switch (key) {
+            case KeyEvent.VK_ESCAPE:
+                stop();
+                break;
+            case KeyEvent.VK_W: {
+                player.jump(jump, gravity);
+                break;
             }
-        }
-        if (key == KeyEvent.VK_R){
-            initialiseGame();
+            case KeyEvent.VK_D: {
+                player.setVelocityX(0.25f);
+                player.setScaleX(-1);
+                break;
+            }
+            case KeyEvent.VK_A: {
+                player.setVelocityX(-0.25f);
+                player.setScaleX(1);
+                break;
+            }
+            case KeyEvent.VK_SPACE: {
+                if (player.isGrounded()) {
+                    gravity = -gravity;
+                    player.setScaleY((float) -player.getScaleY());
+                    player.setGrounded(false);
+                }
+                break;
+            }
+            case KeyEvent.VK_R: {
+                initialiseGame();
+                break;
+            }
+            default:
+                break;
         }
     }
 
@@ -279,8 +285,8 @@ public class Game extends GameCore
         float sy = s.getY();
         int swidth = s.getWidth();
         int sheight = s.getHeight();
-        float sxmid = sx + swidth/2;
-        float symid = sy + sheight/2;	
+        float sxmid = sx + swidth / 2;
+        float symid = sy + sheight / 2;
         // Find out how wide and how tall a tile is
         float tileWidth = tmap.getTileWidth();
         float tileHeight = tmap.getTileHeight();
@@ -288,63 +294,59 @@ public class Game extends GameCore
         //TOP RIGHT
         int TRxtile = (int) ((sx + swidth) / tileWidth);
         int TRytile = (int) (sy / tileHeight);
-        int TRXmid = (int) (tmap.getTileXC(TRxtile, TRytile) + tileWidth/2);
-        int TRYmid = (int) (tmap.getTileYC(TRxtile, TRytile) + tileHeight/2);
+        int TRXmid = (int) (tmap.getTileXC(TRxtile, TRytile) + tileWidth / 2);
+        int TRYmid = (int) (tmap.getTileYC(TRxtile, TRytile) + tileHeight / 2);
         TR = tmap.getTileChar(TRxtile, TRytile);
 
         //BOTTOM RIGHT
         int BRxtile = (int) ((sx + swidth) / tileWidth);
         int BRytile = (int) ((sy + sheight) / tileHeight);
-        int BRXmid = (int) (tmap.getTileXC(BRxtile, BRytile) + tileWidth/2);
-        int BRYmid = (int) (tmap.getTileYC(BRxtile, BRytile) + tileHeight/2);
+        int BRXmid = (int) (tmap.getTileXC(BRxtile, BRytile) + tileWidth / 2);
+        int BRYmid = (int) (tmap.getTileYC(BRxtile, BRytile) + tileHeight / 2);
         BR = tmap.getTileChar(BRxtile, BRytile);
 
         //TOP LEFT
         int TLxtile = (int) (sx / tileWidth);
         int TLytile = (int) (sy / tileHeight);
-        int TLXmid = (int) (tmap.getTileXC(TLxtile, TLytile) + tileWidth/2);
-        int TLYmid = (int) (tmap.getTileYC(TLxtile, TLytile) + tileHeight/2);
+        int TLXmid = (int) (tmap.getTileXC(TLxtile, TLytile) + tileWidth / 2);
+        int TLYmid = (int) (tmap.getTileYC(TLxtile, TLytile) + tileHeight / 2);
         TL = tmap.getTileChar(TLxtile, TLytile);
 
         //BOTTOM LEFT
         int BLxtile = (int) (sx / tileWidth);
         int BLytile = (int) ((sy + sheight) / tileHeight);
-        int BLXmid = (int) (tmap.getTileXC(BLxtile, BLytile) + tileWidth/2);
-        int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight/2);
+        int BLXmid = (int) (tmap.getTileXC(BLxtile, BLytile) + tileWidth / 2);
+        int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight / 2);
         BL = tmap.getTileChar(BLxtile, BLytile);
         boolean leftWall = false, rightWall = false;
 
-        if (((TR != '.' && Math.abs(TRXmid - sxmid) > Math.abs(TRYmid-symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) > Math.abs(BRYmid-symid) && BL == '.'))&& s.getVelocityX() > 0) {
+        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){// && s.getVelocityX() > 0) {
 //          if ((TR != '.' && TL == '.') || (BR !='.' && BL =='.')){
             rightWall = true;
             s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth()-1);
+            s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
         }
-
-        else if (((TL != '.' && Math.abs(TLXmid - sxmid) > Math.abs(TLYmid-symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) > Math.abs(BLYmid-symid) && BR == '.'))&& s.getVelocityX()<0){
+        else if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){// && s.getVelocityX() < 0) {
             leftWall = true;
             s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth+1);
+            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
         }
-        sxmid = s.getX() + swidth/2;
-        symid = s.getY() + sheight/2;
+        sxmid = s.getX() + swidth / 2;
+        symid = s.getY() + sheight / 2;
 
-        if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY()>=0){
+        if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && TL == '.') || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && TR == '.')) && s.getVelocityY() > 0) {
             if (gravity > 0) {
                 s.setGrounded(true);
             }
-            s.setVelocityY(0);
             s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+            s.setVelocityY(0);
         }
-        else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && !leftWall) || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && !rightWall)) && s.getVelocityY()<=0) {
+        else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && BL == '.') || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && BR == '.')) && s.getVelocityY() < 0) {
             if (gravity < 0) {
                 s.setGrounded(true);
             }
+            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileWidth);
             s.setVelocityY(0);
-            s.setY(tmap.getTileYC(TLxtile, TLytile)+tileWidth);
-        }
-        else{
-            s.setGrounded(false);
         }
     }
 
