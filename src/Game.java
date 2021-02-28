@@ -21,10 +21,7 @@ import game2D.*;
  * @author David Cairns
  *
  */
-@SuppressWarnings("serial")
-
-public class Game extends GameCore 
-{
+public class Game extends GameCore {
 	// Useful game constants
 	static int screenWidth = 1024;
 	static int screenHeight = 768;
@@ -78,12 +75,12 @@ public class Game extends GameCore
         // rearrange to give the illusion of motion
         
         playerIdle = new Animation();
-        playerIdle.loadAnimationFromSheet("images/idle.png", 4, 1, 250);
+        playerIdle.loadAnimationFromSheet("images/idle.png", 2, 2, 250);
 
         playerRunning = new Animation();
         playerRunning.loadAnimationFromSheet("images/run.png", 3, 2, 150);
         // Initialise the player with an animation
-        player = new Sprite(playerIdle);
+        player = new Sprite(playerIdle, 0.25f);
 
         // Load a single cloud animation
         Animation ca = new Animation();
@@ -94,7 +91,7 @@ public class Game extends GameCore
         // to the right
         for (int c=0; c<3; c++)
         {
-        	s = new Sprite(ca);
+        	s = new Sprite(ca, 0.03f);
         	s.setX(screenWidth + (int)(Math.random()*200.0f));
         	s.setY(30 + (int)(Math.random()*150.0f));
         	s.setVelocityX(-0.02f);
@@ -182,15 +179,6 @@ public class Game extends GameCore
        	        s.update(elapsed);
             }
         }
-       	for (Sprite s: clouds)
-       		s.update(elapsed);
-        if (player.getVelocityX()==0 && player.isGrounded()){
-            player.setAnimation(playerIdle);
-        }
-        else {
-            player.setAnimation(playerRunning);
-        }
-
 
         // Now update the sprites animation and position
         player.update(elapsed);
@@ -198,8 +186,16 @@ public class Game extends GameCore
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
+        for (Sprite s: clouds)
+            s.update(elapsed);
+        if (player.getVelocityX() == 0){
+            player.setAnimation(playerIdle);
+        }
+        else {
+            player.setAnimation(playerRunning);
+        }
     }
-    
+
     
     /**
      * Checks and handles collisions with the edge of the screen
@@ -228,25 +224,27 @@ public class Game extends GameCore
      * 
      *  @param e The event that has been generated
      */
-    public void keyPressed(KeyEvent e) 
-    { 
+    public void keyPressed(KeyEvent e)
+    {
     	int key = e.getKeyCode();
         switch (key) {
             case KeyEvent.VK_ESCAPE:
                 stop();
                 break;
-            case KeyEvent.VK_W: {
-                player.jump(jump, gravity);
-                break;
-            }
             case KeyEvent.VK_D: {
-                player.setVelocityX(0.25f);
+                player.setDirection('r');
+//                player.setVelocityX(0.25f);
                 player.setScaleX(-1);
                 break;
             }
             case KeyEvent.VK_A: {
-                player.setVelocityX(-0.25f);
+                player.setDirection('l');
+//                player.setVelocityX(-0.25f);
                 player.setScaleX(1);
+                break;
+            }
+            case KeyEvent.VK_W: {
+                player.jump(jump, gravity);
                 break;
             }
             case KeyEvent.VK_SPACE: {
@@ -321,7 +319,6 @@ public class Game extends GameCore
         boolean leftWall = false, rightWall = false;
 
         if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){// && s.getVelocityX() > 0) {
-//          if ((TR != '.' && TL == '.') || (BR !='.' && BL =='.')){
             rightWall = true;
             s.setVelocityX(0);
             s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
@@ -329,19 +326,28 @@ public class Game extends GameCore
         else if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){// && s.getVelocityX() < 0) {
             leftWall = true;
             s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth);
+            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth - 1);
+        }
+//        else{
+//            player.setVelocityX(-0.25f);
+//        }
+        else if (s.getDirection() == 'r'){
+            s.setVelocityX(s.getSpeed());
+        }
+        else if (s.getDirection() == 'l'){
+            s.setVelocityX(-s.getSpeed());
         }
         sxmid = s.getX() + swidth / 2;
         symid = s.getY() + sheight / 2;
-
-        if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && TL == '.') || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && TR == '.')) && s.getVelocityY() > 0) {
+        s.setGrounded(false);
+        if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY() > 0) {
             if (gravity > 0) {
                 s.setGrounded(true);
             }
             s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
             s.setVelocityY(0);
         }
-        else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && BL == '.') || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && BR == '.')) && s.getVelocityY() < 0) {
+        else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && !leftWall) || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && !rightWall)) && s.getVelocityY() < 0) {
             if (gravity < 0) {
                 s.setGrounded(true);
             }
@@ -362,6 +368,7 @@ public class Game extends GameCore
             }
             case KeyEvent.VK_D:
             case KeyEvent.VK_A: {
+                player.setDirection('i');
                 player.setVelocityX(0f);
                 break;
             }
@@ -382,7 +389,7 @@ public class Game extends GameCore
             bg.addFrame(loadImage(path), 1000);
             LinkedList<Sprite> bgList = new LinkedList<>();
             for (int j = 0; j < 3; j++){
-                Sprite s = new Sprite(bg);
+                Sprite s = new Sprite(bg, bgSpeed/100);
                 s.setX(0+j*s.getWidth());
                 s.setY(0);
                 s.show();

@@ -10,7 +10,7 @@ import java.awt.geom.*;
  * @author David Cairns
  * @author Aaron Nobile
  */
-public class Sprite {
+public class  Sprite {
 
 	// The current Animation to use for this sprite
     private Animation anim;		
@@ -19,7 +19,9 @@ public class Sprite {
     private float x, y;
 
     // Velocity (pixels per millisecond)
-    private float dx, dy;
+    private float dx, dy, speed;
+
+    private char direction;
 
     // Dimensions of the sprite
     private float height, width, radius;
@@ -27,7 +29,6 @@ public class Sprite {
     //Sprite touching ground
     private boolean ground;
 
-    private boolean horiz;
     // The scale to draw the sprite at where 1 equals normal size
     private double scaleX, scaleY;
     // The rotation to apply to the sprite image
@@ -46,7 +47,8 @@ public class Sprite {
      *  
      * @param anim The animation to use for the sprite.
      */
-    public Sprite(Animation anim) {
+    public Sprite(Animation anim, float s) {
+        speed = s;
         ground = false;
         this.anim = anim;
         render = true;
@@ -242,8 +244,9 @@ public class Sprite {
      * Sets the horizontal velocity of this Sprite in pixels
      * per millisecond.
      */
-    public void setVelocityX(float dx) {
-        this.dx = dx;
+    public void setVelocityX(float x) {
+            dx = x;
+
     }
 
     /**
@@ -262,6 +265,10 @@ public class Sprite {
 		this.dx = dx;
 		this.dy = dy;
 	}
+
+	public void setSpeed(float s){speed = s;}
+
+    public float getSpeed(){return speed;}
 
 	/**
      * Set the scale of the sprite to 's'. If s is 1
@@ -445,6 +452,8 @@ public class Sprite {
         return ground;
     }
 
+
+
     public void jump(float force, float gravity){
             if (gravity > 0 && ground){
                 this.dy = -force;
@@ -455,5 +464,9 @@ public class Sprite {
                 ground = false;
             }
     }
+    public char getDirection(){return direction;}
 
+    public void setDirection(char d){
+        direction = d;
+    }
 }
