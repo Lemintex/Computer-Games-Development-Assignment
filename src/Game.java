@@ -31,7 +31,7 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation playerIdle, playerRunning;
+    Animation playerIdle, playerRunning, playerJumping, playerFalling;
     
     Sprite	player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
@@ -75,10 +75,17 @@ public class Game extends GameCore {
         // rearrange to give the illusion of motion
         
         playerIdle = new Animation();
-        playerIdle.loadAnimationFromSheet("images/idle.png", 2, 2, 250);
+        playerIdle.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
 
         playerRunning = new Animation();
-        playerRunning.loadAnimationFromSheet("images/run.png", 3, 2, 150);
+        playerRunning.loadAnimationFromSheet("images/player/run.png", 3, 2, 150);
+
+        playerJumping = new Animation();
+        playerJumping.loadAnimationFromSheet("images/player/jump.png", 2, 2, 150);
+        playerJumping.setLoop(false);
+
+        playerFalling = new Animation();
+        playerFalling.loadAnimationFromSheet("images/player/fall.png", 2, 1, 150);
         // Initialise the player with an animation
         player = new Sprite(playerIdle, 0.25f);
 
@@ -169,14 +176,13 @@ public class Game extends GameCore {
      * 
      * @param elapsed The elapsed time between this call and the previous call of elapsed
      */    
-    public void update(long elapsed)
-    {
+    public void update(long elapsed) {
         player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
-       	player.setAnimationSpeed(1.0f);
+        player.setAnimationSpeed(1.0f);
 
-       	for (LinkedList<Sprite> l : backgroundList){
-       	    for (Sprite s : l){
-       	        s.update(elapsed);
+        for (LinkedList<Sprite> l : backgroundList) {
+            for (Sprite s : l) {
+                s.update(elapsed);
             }
         }
 
@@ -186,16 +192,19 @@ public class Game extends GameCore {
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
-        for (Sprite s: clouds)
+        for (Sprite s : clouds)
             s.update(elapsed);
-        if (player.getVelocityX() == 0){
-            player.setAnimation(playerIdle);
+        if (player.isGrounded()) {
+            if (player.getVelocityX() == 0)
+                player.setAnimation(playerIdle);
+            else
+                player.setAnimation(playerRunning);
         }
-        else {
-            player.setAnimation(playerRunning);
-        }
+        else if (Math.signum(gravity) != Math.signum(player.getVelocityY()) && gravity != 0)
+            player.setAnimation(playerJumping);
+        else if ((Math.signum(gravity) == Math.signum(player.getVelocityY()) && gravity != 0 && !player.isGrounded()))
+            player.setAnimation(playerFalling);
     }
-
     
     /**
      * Checks and handles collisions with the edge of the screen
@@ -320,39 +329,43 @@ public class Game extends GameCore {
 
         if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){// && s.getVelocityX() > 0) {
             rightWall = true;
-            s.setVelocityX(0);
+            if (s.getDirection() == 'r')
+                s.setVelocityX(0);
             s.setX(tmap.getTileXC(TRxtile, TRytile) - s.getWidth());
         }
-        else if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){// && s.getVelocityX() < 0) {
-            leftWall = true;
-            s.setVelocityX(0);
-            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth - 1);
-        }
-//        else{
-//            player.setVelocityX(-0.25f);
-//        }
         else if (s.getDirection() == 'r'){
             s.setVelocityX(s.getSpeed());
+        }
+
+        if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){// && s.getVelocityX() < 0) {
+            leftWall = true;
+            if (s.getDirection() == 'l')
+                s.setVelocityX(0);
+            s.setX(tmap.getTileXC(TLxtile, TLytile) + tileWidth - 1);
         }
         else if (s.getDirection() == 'l'){
             s.setVelocityX(-s.getSpeed());
         }
+//        else{
+//            player.setVelocityX(-0.25f);
+//        }
+
+
         sxmid = s.getX() + swidth / 2;
         symid = s.getY() + sheight / 2;
         s.setGrounded(false);
         if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY() > 0) {
-            if (gravity > 0) {
+            if (gravity > 0)
                 s.setGrounded(true);
-            }
-            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
             s.setVelocityY(0);
+            s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
+
         }
         else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && !leftWall) || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && !rightWall)) && s.getVelocityY() < 0) {
-            if (gravity < 0) {
+            if (gravity < 0)
                 s.setGrounded(true);
-            }
-            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileWidth);
             s.setVelocityY(0);
+            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileWidth);
         }
     }
 
