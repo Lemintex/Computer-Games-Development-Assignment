@@ -45,12 +45,12 @@ public class  Sprite {
     /**
      * Creates a new Sprite object with the specified Animation.
      *  
-     * @param anim The animation to use for the sprite.
+     * @param a The animation to use for the sprite.
      */
-    public Sprite(Animation anim, float s) {
+    public Sprite(Animation a, float s) {
         speed = s;
         ground = false;
-        this.anim = anim;
+        anim = a;
         render = true;
         scaleX = 1.0f;
         scaleY = 1.0f;

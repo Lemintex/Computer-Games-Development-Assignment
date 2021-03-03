@@ -33,7 +33,7 @@ public class Game extends GameCore {
     // Game resources
     Animation playerIdle, playerRunning, playerJumping, playerFalling;
     
-    Sprite	player = null;
+    Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
 
     ArrayList<LinkedList> backgroundList = new ArrayList<>();
@@ -77,17 +77,9 @@ public class Game extends GameCore {
         playerIdle = new Animation();
         playerIdle.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
 
-        playerRunning = new Animation();
-        playerRunning.loadAnimationFromSheet("images/player/run.png", 3, 2, 150);
-
-        playerJumping = new Animation();
-        playerJumping.loadAnimationFromSheet("images/player/jump.png", 2, 2, 150);
-        playerJumping.setLoop(false);
-
-        playerFalling = new Animation();
-        playerFalling.loadAnimationFromSheet("images/player/fall.png", 2, 1, 150);
         // Initialise the player with an animation
-        player = new Sprite(playerIdle, 0.25f);
+        player = new Player(playerIdle, 0.25f);
+        player.loadAnimations();
 
         // Load a single cloud animation
         Animation ca = new Animation();
@@ -194,16 +186,7 @@ public class Game extends GameCore {
         checkTileCollision(player, tmap);
         for (Sprite s : clouds)
             s.update(elapsed);
-        if (player.isGrounded()) {
-            if (player.getVelocityX() == 0)
-                player.setAnimation(playerIdle);
-            else
-                player.setAnimation(playerRunning);
-        }
-        else if (Math.signum(gravity) != Math.signum(player.getVelocityY()) && gravity != 0)
-            player.setAnimation(playerJumping);
-        else if ((Math.signum(gravity) == Math.signum(player.getVelocityY()) && gravity != 0 && !player.isGrounded()))
-            player.setAnimation(playerFalling);
+        player.updateAnimations(gravity);
     }
     
     /**
@@ -379,10 +362,17 @@ public class Game extends GameCore {
 			case KeyEvent.VK_W: {
                 break;
             }
-            case KeyEvent.VK_D:
+            case KeyEvent.VK_D:{
+                if (player.getDirection() == 'r') {
+                    player.setDirection('i');
+                    player.setVelocityX(0f);
+                }
+            }
             case KeyEvent.VK_A: {
-                player.setDirection('i');
-                player.setVelocityX(0f);
+                if (player.getDirection() == 'l') {
+                    player.setDirection('i');
+                    player.setVelocityX(0f);
+                }
                 break;
             }
             default :  break;
