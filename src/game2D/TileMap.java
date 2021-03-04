@@ -143,7 +143,6 @@ public class TileMap
 				if (trimmed.charAt(0) == '#') // Look for a character to image map
 				{
 					// Extract the character
-					
 					String ch = "" + trimmed.charAt(1);
 					// and it's file name
 					String fileName = trimmed.substring(3,trimmed.length());
@@ -154,6 +153,12 @@ public class TileMap
 						imagemap.put(ch,img);
 					else
 						System.err.println("Failed to load image '" + folder + "/" + fileName + "'");
+				}
+				if (trimmed.charAt(0) == '@'){
+					// Extract the character
+					String ch = "" + trimmed.charAt(1);
+					// and its class name
+					String className = trimmed.substring(3,trimmed.length());
 				}
 			}
 			

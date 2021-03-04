@@ -10,7 +10,7 @@ import java.awt.geom.*;
  * @author David Cairns
  * @author Aaron Nobile
  */
-public class  Sprite {
+public class Sprite {
 
 	// The current Animation to use for this sprite
     private Animation anim;		
