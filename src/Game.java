@@ -35,7 +35,7 @@ public class Game extends GameCore {
     
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
-
+    ArrayList<Sprite> spriteList = new ArrayList<>();
     ArrayList<LinkedList> backgroundList = new ArrayList<>();
 
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()

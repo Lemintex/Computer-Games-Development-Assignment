@@ -4,6 +4,7 @@ import javax.swing.ImageIcon;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.*;
@@ -34,7 +35,7 @@ import java.io.*;
  * }
  * @author David Cairns
  */
-public class TileMap 
+public class TileMap
 {
 
 	private Tile [][] tmap;		// The tile map grid, initially null
@@ -46,7 +47,8 @@ public class TileMap
 	// imagemap contains a set of character to image mappings for
 	// quick loop up of the image associated with a given character.
 	private Map<String,Image> imagemap = new HashMap<String,Image>();
-	
+	private Map<String, Sprite> spritemap = new HashMap<String, Sprite>();
+
 	/**
 	 * @return The map height in tiles
 	 */
@@ -159,6 +161,7 @@ public class TileMap
 					String ch = "" + trimmed.charAt(1);
 					// and its class name
 					String className = trimmed.substring(3,trimmed.length());
+					spritemap.put(ch, (Sprite) Class.forName("Game2D." + className).newInstance());
 				}
 			}
 			
@@ -355,5 +358,9 @@ public class TileMap
 				g.drawImage(img,xc,yc,null);
 			}
 		}		
+	}
+
+	public void loadSprite(ArrayList spriteList){
+
 	}
 }
