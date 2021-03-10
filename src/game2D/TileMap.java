@@ -99,7 +99,7 @@ public class TileMap
 	 * @param mapfile The name of the map file in the map folder
 	 * @return true if the map loaded successfully, false otherwise
 	 */
-	public boolean loadMap(String folder, String mapfile)
+	public boolean loadMap(String folder, String mapfile, ArrayList<Animation> initAnimations, ArrayList<Sprite>spriteList)
 	{
 		// Create a full path to the tile map by sticking the folder and mapfile together
 		String path = folder + "/" + mapfile;
@@ -147,7 +147,7 @@ public class TileMap
 					// Extract the character
 					String ch = "" + trimmed.charAt(1);
 					// and it's file name
-					String fileName = trimmed.substring(3,trimmed.length());
+					String fileName = trimmed.substring(3);
 					
 					Image img  = new ImageIcon(folder + "/" + fileName).getImage();
 					// Now add this character->image mapping to the map
@@ -156,12 +156,22 @@ public class TileMap
 					else
 						System.err.println("Failed to load image '" + folder + "/" + fileName + "'");
 				}
-				if (trimmed.charAt(0) == '@'){
+				else if (trimmed.charAt(0) == '@'){
+					Sprite s;
 					// Extract the character
 					String ch = "" + trimmed.charAt(1);
 					// and its class name
-					String className = trimmed.substring(3,trimmed.length());
-					spritemap.put(ch, (Sprite) Class.forName("Game2D." + className).newInstance());
+					String className = trimmed.substring(3);
+					switch (className){
+						case "Player":
+							s = new Player(initAnimations.get(0), 0.25f);
+							spritemap.put(ch, s);
+							break;
+						case "Bat":
+							s = new Bat(initAnimations.get(1), 0.3f);
+							spritemap.put(ch, s);
+							break;
+					}
 				}
 			}
 			
@@ -191,8 +201,23 @@ public class TileMap
 						continue;
 					}
 					
-					for (int col=0; col<mapWidth && col<line.length(); col++)
-						tmap[col][row] = new Tile(line.charAt(col),col*tileWidth,row*tileHeight);
+					for (int col=0; col<mapWidth && col<line.length(); col++) {
+						for (String s : spritemap.keySet()){
+							if (line.charAt(col) == s.charAt(0)){
+								Sprite sprite = spritemap.get(s);
+								sprite.setPosition(col * tileWidth, row * tileHeight);
+								sprite.setVelocity(0, 0);
+								sprite.show();
+								spriteList.add(sprite);
+							}
+							if (spritemap.containsKey(String.valueOf(line.charAt(col)))) {
+								tmap[col][row] = new Tile('.', col * tileWidth, row * tileHeight);
+								continue;
+							}
+							tmap[col][row] = new Tile(line.charAt(col), col * tileWidth, row * tileHeight);
+
+						}
+					}
 					row++;
 					
 					if (row >= mapHeight) break;

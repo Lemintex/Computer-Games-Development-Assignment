@@ -31,8 +31,8 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation playerIdle, playerRunning, playerJumping, playerFalling;
-    
+    Animation initPlayerAnim, initBatAnim;
+    ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
     ArrayList<Sprite> spriteList = new ArrayList<>();
@@ -50,7 +50,6 @@ public class Game extends GameCore {
      * @param args	The list of parameters this program might use (ignored)
      */
     public static void main(String[] args) {
-
         Game gct = new Game();
         gct.init();
         // Start in windowed mode with the given screen height and width
@@ -64,21 +63,15 @@ public class Game extends GameCore {
     public void init()
     {         
         Sprite s;	// Temporary reference to a sprite
-
+        initialiseAnimations();
         // Load the tile map and print it out so we can check it is valid
-        tmap.loadMap("maps", "map.txt");
+        tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
         
         setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
         setVisible(true);
 
-        // Create a set of background sprites that we can 
-        // rearrange to give the illusion of motion
-        
-        playerIdle = new Animation();
-        playerIdle.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
-
         // Initialise the player with an animation
-        player = new Player(playerIdle, 0.25f);
+        player = new Player(initPlayerAnim, 0.25f);
         player.loadAnimations();
 
         // Load a single cloud animation
@@ -101,6 +94,16 @@ public class Game extends GameCore {
         initialiseGame();
       		
         System.out.println(tmap);
+    }
+
+    public void initialiseAnimations(){
+        initPlayerAnim = new Animation();
+        initPlayerAnim.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
+        initAnimations.add(initPlayerAnim);
+
+        initBatAnim = new Animation();
+        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 2, 4, 200);
+        initAnimations.add(initBatAnim);
     }
 
     /**
@@ -144,7 +147,7 @@ public class Game extends GameCore {
 //        g.fillRect(0, 0, getWidth(), getHeight());
 
         // Apply offsets to sprites then draw them
-        for (Sprite s: clouds)
+        for (Sprite s: spriteList)
         {
         	s.setOffsets(xo,yo);
         	s.draw(g);
@@ -154,7 +157,7 @@ public class Game extends GameCore {
         player.setOffsets(xo, yo);
         player.drawTransformed(g);
 
-        // Apply offsets to tile map and draw  it
+        // Apply offsets to tile map and draw it
         tmap.draw(g,xo,yo);    
         
         // Show score and status information
