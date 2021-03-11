@@ -21,7 +21,6 @@ public class Player extends Sprite{
 
         playerJumping = new Animation();
         playerJumping.loadAnimationFromSheet("images/player/jump.png", 2, 2, 150);
-        playerJumping.setLoop(false);
 
         playerFalling = new Animation();
         playerFalling.loadAnimationFromSheet("images/player/fall.png", 2, 1, 150);

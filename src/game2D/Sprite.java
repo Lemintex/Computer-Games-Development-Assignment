@@ -469,4 +469,12 @@ public class Sprite {
     public void setDirection(char d){
         direction = d;
     }
+
+    public void loadAnimations(){
+        //this will be used in polymorphism but has to be here
+    }
+
+    public void updateAnimations(float g){
+        //this will be used in polymorphism but has to be here
+    }
 }

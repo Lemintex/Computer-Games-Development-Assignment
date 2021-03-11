@@ -66,13 +66,18 @@ public class Game extends GameCore {
         initialiseAnimations();
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
-        
+
+        for (Sprite sprite: spriteList)
+            if (sprite instanceof Player) {
+                player = (Player) sprite;
+                break;
+            }
         setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
         setVisible(true);
+//        if (spriteList.contains(new Player))
 
-        // Initialise the player with an animation
-        player = new Player(initPlayerAnim, 0.25f);
-        player.loadAnimations();
+        for (Sprite sprite: spriteList)
+            sprite.loadAnimations();
 
         // Load a single cloud animation
         Animation ca = new Animation();
@@ -102,7 +107,7 @@ public class Game extends GameCore {
         initAnimations.add(initPlayerAnim);
 
         initBatAnim = new Animation();
-        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 2, 4, 200);
+        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 4, 2, 200);
         initAnimations.add(initBatAnim);
     }
 
@@ -114,10 +119,6 @@ public class Game extends GameCore {
     public void initialiseGame()
     {
     	total = 0;
-        player.setX(100);
-        player.setY(600);
-        player.setVelocityX(0);
-        player.setVelocityY(0);
         player.show();
     }
     
@@ -150,7 +151,7 @@ public class Game extends GameCore {
         for (Sprite s: spriteList)
         {
         	s.setOffsets(xo,yo);
-        	s.draw(g);
+        	s.drawTransformed(g);
         }
 
         // Apply offsets to player and draw 
@@ -176,20 +177,19 @@ public class Game extends GameCore {
         player.setAnimationSpeed(1.0f);
 
         for (LinkedList<Sprite> l : backgroundList) {
-            for (Sprite s : l) {
+            for (Sprite s : l)
                 s.update(elapsed);
             }
+        for (Sprite s: spriteList) {
+            s.update(elapsed);
+            s.updateAnimations(gravity);
         }
-
-        // Now update the sprites animation and position
-        player.update(elapsed);
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
         for (Sprite s : clouds)
             s.update(elapsed);
-        player.updateAnimations(gravity);
     }
     
     /**
