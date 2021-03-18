@@ -200,23 +200,22 @@ public class TileMap
 						System.err.println(row + " : " + line);
 						continue;
 					}
-					
 					for (int col=0; col<mapWidth && col<line.length(); col++) {
-						for (String s : spritemap.keySet()){
-							if (line.charAt(col) == s.charAt(0)){
-								Sprite sprite = spritemap.get(s);
-								sprite.setPosition(col * tileWidth, row * tileHeight);
-								sprite.setVelocity(0, 0);
-								sprite.show();
-								spriteList.add(sprite);
+						for (String s : spritemap.keySet()) {
+							if (line.charAt(col) == s.charAt(0)) {
+								Sprite sp = null;
+								sp = spritemap.get(s);
+								sp = sp.clone();
+								sp.setPosition(col * tileWidth, row * tileHeight);
+								sp.setVelocity(0, 0);
+								spriteList.add(sp);
 							}
+						}
 							if (spritemap.containsKey(String.valueOf(line.charAt(col)))) {
 								tmap[col][row] = new Tile('.', col * tileWidth, row * tileHeight);
 								continue;
 							}
 							tmap[col][row] = new Tile(line.charAt(col), col * tileWidth, row * tileHeight);
-
-						}
 					}
 					row++;
 					

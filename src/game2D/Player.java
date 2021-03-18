@@ -15,7 +15,6 @@ public class Player extends Sprite{
     }
 
     public void loadAnimations(){
-
         playerRunning = new Animation();
         playerRunning.loadAnimationFromSheet("images/player/run.png", 3, 2, 150);
 
