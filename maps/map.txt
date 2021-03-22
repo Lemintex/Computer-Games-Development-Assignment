@@ -11,7 +11,8 @@
 #d=dirt.png
 @P=Player
 @B=Bat
-@C=Coin
+@S=Coin
+@C=Crate
 // The actual tile map is preceded by the #map line
 #map
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

@@ -174,6 +174,11 @@ public class TileMap
 						case "Coin":
 							s = new Coin(initAnimations.get(2), 0);
 							spritemap.put(ch, s);
+							break;
+						case "Crate":
+							s = new Crate(initAnimations.get(3), 0);
+							spritemap.put(ch, s);
+							break;
 					}
 				}
 			}

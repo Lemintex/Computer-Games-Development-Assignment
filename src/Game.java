@@ -31,7 +31,7 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation initPlayerAnim, initBatAnim, initCoinAnim;
+    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
@@ -107,12 +107,16 @@ public class Game extends GameCore {
         initAnimations.add(initPlayerAnim);
 
         initBatAnim = new Animation();
-        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 5, 1, 200);
+        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 5, 1, 500);
         initAnimations.add(initBatAnim);
 
         initCoinAnim = new Animation();
         initCoinAnim.loadAnimationFromSheet("images/coin/coin.png", 3, 2, 250);
         initAnimations.add(initCoinAnim);
+
+        initCrateAnim = new Animation();
+        initCrateAnim.loadAnimationFromSheet("images/crate/crate.png", 1, 1, 100);
+        initAnimations.add(initCrateAnim);
     }
 
     /**
@@ -177,8 +181,6 @@ public class Game extends GameCore {
      * @param elapsed The elapsed time between this call and the previous call of elapsed
      */    
     public void update(long elapsed) {
-        player.setVelocityY(player.getVelocityY() + (gravity * elapsed));
-        player.setAnimationSpeed(1.0f);
 
         for (LinkedList<Sprite> l : backgroundList) {
             for (Sprite s : l)
@@ -186,12 +188,15 @@ public class Game extends GameCore {
             }
         for (Sprite s: spriteList) {
             s.update(elapsed);
+            checkTileCollision(s, tmap);
             s.updateAnimations(gravity);
+            s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
         }
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
-        checkTileCollision(player, tmap);
+        for (Sprite s: spriteList) {
+        }
         for (Sprite s : spriteList) {
             for (Sprite s2 : spriteList) {
                 if (!s.equals(s2))
