@@ -171,6 +171,9 @@ public class TileMap
 							s = new Bat(initAnimations.get(1), 0.3f);
 							spritemap.put(ch, s);
 							break;
+						case "Coin":
+							s = new Coin(initAnimations.get(2), 0);
+							spritemap.put(ch, s);
 					}
 				}
 			}
@@ -204,18 +207,16 @@ public class TileMap
 						for (String s : spritemap.keySet()) {
 							if (line.charAt(col) == s.charAt(0)) {
 								Sprite sp = null;
-								sp = spritemap.get(s);
-								sp = sp.clone();
+								sp = spritemap.get(s).copy();
 								sp.setPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
 							}
 						}
-							if (spritemap.containsKey(String.valueOf(line.charAt(col)))) {
+							if (spritemap.containsKey(String.valueOf(line.charAt(col))))
 								tmap[col][row] = new Tile('.', col * tileWidth, row * tileHeight);
-								continue;
-							}
-							tmap[col][row] = new Tile(line.charAt(col), col * tileWidth, row * tileHeight);
+							else
+								tmap[col][row] = new Tile(line.charAt(col), col * tileWidth, row * tileHeight);
 					}
 					row++;
 					

@@ -8,9 +8,7 @@ public class Bat extends Sprite{
         batAngry = anim;
     }
 
-    public Bat clone(){
-        Bat b = new Bat(batAngry, 0);
-
-        return b;
+    public Bat copy() throws CloneNotSupportedException {
+        return (Bat) this.clone();
     }
 }

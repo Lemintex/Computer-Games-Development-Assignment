@@ -10,7 +10,7 @@ import java.awt.geom.*;
  * @author David Cairns
  * @author Aaron Nobile
  */
-public class Sprite {
+public class Sprite implements Cloneable{
 
 	// The current Animation to use for this sprite
     private Animation anim;		
@@ -478,21 +478,11 @@ public class Sprite {
         //this will be used in polymorphism but has to be here
     }
 
-    public Sprite clone(){
-        Sprite s = new Sprite(anim, speed);
-        s.x = x;
-        s.y = y;
-        s.dx = dx;
-        s.dy = dy;
-        s.direction = direction;
-        s.radius = radius;
-        s.xoff = xoff;
-        s.yoff = yoff;
-        s.ground = ground;
-        s.render = render;
-        s.scaleX = scaleX;
-        s.scaleY = scaleY;
-        s.rotation = rotation;
-        return (Sprite) s;
+    public Sprite copy() throws CloneNotSupportedException {
+        return (Sprite) this.clone();
+    }
+
+    public void handleCollisionWithPlayer(){
+        //this will be used in polymorphism but has to be here
     }
 }

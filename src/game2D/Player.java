@@ -1,6 +1,6 @@
 package game2D;
 
-public class Player extends Sprite{
+public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
     /**
@@ -44,5 +44,14 @@ public class Player extends Sprite{
     public void kill(){
         super.setAnimation(playerDying);
         super.setVelocityX(0);
+    }
+
+    public Player copy() throws CloneNotSupportedException {
+//        super.clone();
+        return (Player) this.clone();
+    }
+
+    public void handlePlayerCollision(){
+        //this will be used in polymorphism but has to be here
     }
 }

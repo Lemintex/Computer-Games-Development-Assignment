@@ -31,7 +31,7 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation initPlayerAnim, initBatAnim;
+    Animation initPlayerAnim, initBatAnim, initCoinAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
@@ -107,8 +107,12 @@ public class Game extends GameCore {
         initAnimations.add(initPlayerAnim);
 
         initBatAnim = new Animation();
-        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 4, 2, 200);
+        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 5, 1, 200);
         initAnimations.add(initBatAnim);
+
+        initCoinAnim = new Animation();
+        initCoinAnim.loadAnimationFromSheet("images/coin/coin.png", 3, 2, 250);
+        initAnimations.add(initCoinAnim);
     }
 
     /**
@@ -119,7 +123,7 @@ public class Game extends GameCore {
     public void initialiseGame()
     {
     	total = 0;
-        player.show();
+//        player.show();
     }
     
     /**
@@ -188,6 +192,12 @@ public class Game extends GameCore {
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
         checkTileCollision(player, tmap);
+        for (Sprite s : spriteList) {
+            for (Sprite s2 : spriteList) {
+                if (!s.equals(s2))
+                    boundingBoxCollision(s, s2);
+            }
+        }
         for (Sprite s : clouds)
             s.update(elapsed);
     }
@@ -229,13 +239,14 @@ public class Game extends GameCore {
             case KeyEvent.VK_D: {
                 player.setDirection('r');
 //                player.setVelocityX(0.25f);
-                player.setScaleX(-1);
+                player.setScaleX(
+                        1);
                 break;
             }
             case KeyEvent.VK_A: {
                 player.setDirection('l');
 //                player.setVelocityX(-0.25f);
-                player.setScaleX(1);
+                player.setScaleX(-1);
                 break;
             }
             case KeyEvent.VK_W: {
@@ -259,9 +270,38 @@ public class Game extends GameCore {
         }
     }
 
+    /**
+     * Check and handles collisions with the sprite s2 for
+     * the given Sprite 's1'.
+     * @param s1        The sprite to check collisions for
+     * @param s2        The sprite to check collisions with
+     * @return          Do the sprites collide?
+     */
     public boolean boundingBoxCollision(Sprite s1, Sprite s2)
     {
-    	return false;   	
+
+        boolean overlapX = true, overlapY = true;
+        float s1X = s1.getX();
+        float s1Y = s1.getY();
+        int s1width = s1.getWidth();
+        int s1height = s1.getHeight();
+        float s1Xmid = s1X + s1width/2;
+        float s1Ymid = s1Y + s1height/2;
+
+        float s2X = s2.getX();
+        float s2Y = s2.getY();
+        int s2width = s2.getWidth();
+        int s2height = s2.getHeight();
+        float s2Xmid = s2X + s2width/2;
+        float s2Ymid = s2Y + s2height/2;
+
+        if ((s1X + s1width <= s2X || s1X >= s2X + s2width))
+            overlapX = false;
+        if ((s1Y + s1height <= s2Y || s1Y >= s2Y + s2height))
+            overlapY = false;
+        if (overlapX && overlapY)
+            return true;
+        return false;
     }
     
     /**
@@ -280,6 +320,7 @@ public class Game extends GameCore {
         int sheight = s.getHeight();
         float sxmid = sx + swidth / 2;
         float symid = sy + sheight / 2;
+
         // Find out how wide and how tall a tile is
         float tileWidth = tmap.getTileWidth();
         float tileHeight = tmap.getTileHeight();
@@ -313,7 +354,7 @@ public class Game extends GameCore {
         BL = tmap.getTileChar(BLxtile, BLytile);
         boolean leftWall = false, rightWall = false;
 
-        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){// && s.getVelocityX() > 0) {
+        if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){
             rightWall = true;
             if (s.getDirection() == 'r')
                 s.setVelocityX(0);
@@ -323,7 +364,7 @@ public class Game extends GameCore {
             s.setVelocityX(s.getSpeed());
         }
 
-        if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){// && s.getVelocityX() < 0) {
+        if (((TL != '.' && Math.abs(TLXmid - sxmid) >= Math.abs(TLYmid - symid) && TR == '.') || (BL != '.' && Math.abs(BLXmid - sxmid) >= Math.abs(BLYmid - symid) && BR == '.'))){
             leftWall = true;
             if (s.getDirection() == 'l')
                 s.setVelocityX(0);
