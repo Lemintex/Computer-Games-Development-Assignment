@@ -304,7 +304,7 @@ public class Game extends GameCore {
             overlapY = false;
         if (overlapX && overlapY){
             float a = Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X)), b = Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y));
-            if (a<b)
+            if (b>a)
                 c = 'x';
             else
                 c = 'y';
