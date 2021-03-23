@@ -286,6 +286,7 @@ public class Game extends GameCore {
     {
 
         boolean overlapX = true, overlapY = true;
+        char c = 'n';
         float s1X = s1.getX();
         float s1Y = s1.getY();
         int s1width = s1.getWidth();
@@ -304,8 +305,13 @@ public class Game extends GameCore {
             overlapX = false;
         if ((s1Y + s1height <= s2Y || s1Y >= s2Y + s2height))
             overlapY = false;
-        if (overlapX && overlapY)
+        if (overlapX && overlapY){
+            if (Math.signum(s1Xmid-s2Xmid)>=Math.signum(s1Ymid-s2Ymid))
+                c = 'x';
+            else
+                c = 'y';
             return true;
+        }
         return false;
     }
     
