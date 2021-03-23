@@ -482,7 +482,14 @@ public class Sprite implements Cloneable{
         return (Sprite) this.clone();
     }
 
-    public void handleCollisionWithPlayer(){
+    public void handleCollisionWithPlayer(Sprite p, char c, float g){
         //this will be used in polymorphism but has to be here
+    }
+
+    public boolean isOnCrate(){
+        return false;
+    }
+
+    public void setOnCrate(boolean c){
     }
 }

@@ -3,6 +3,7 @@ package game2D;
 public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
+    boolean onCrate;
     /**
      * Creates a new Sprite object with the specified Animation.
      *
@@ -12,6 +13,7 @@ public class Player extends Sprite {//implements Cloneable{
     public Player(Animation anim, float s) {
         super(anim, s);
         playerIdle = anim;
+        onCrate = false;
     }
 
     public void loadAnimations(){
@@ -53,5 +55,13 @@ public class Player extends Sprite {//implements Cloneable{
 
     public void handlePlayerCollision(){
         //this will be used in polymorphism but has to be here
+    }
+
+    public boolean isOnCrate(){
+        return onCrate;
+    }
+
+    public void setOnCrate(boolean c){
+        onCrate = c;
     }
 }

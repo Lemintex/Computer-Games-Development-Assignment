@@ -70,6 +70,7 @@ public class Game extends GameCore {
         for (Sprite sprite: spriteList)
             if (sprite instanceof Player) {
                 player = (Player) sprite;
+//                spriteList.remove(sprite);
                 break;
             }
         setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
@@ -195,13 +196,10 @@ public class Game extends GameCore {
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
-        for (Sprite s: spriteList) {
-        }
+
         for (Sprite s : spriteList) {
-            for (Sprite s2 : spriteList) {
-                if (!s.equals(s2))
-                    boundingBoxCollision(s, s2);
-            }
+            if (!(s instanceof Player))
+                boundingBoxCollision(player, s);
         }
         for (Sprite s : clouds)
             s.update(elapsed);
@@ -244,8 +242,7 @@ public class Game extends GameCore {
             case KeyEvent.VK_D: {
                 player.setDirection('r');
 //                player.setVelocityX(0.25f);
-                player.setScaleX(
-                        1);
+                player.setScaleX(1);
                 break;
             }
             case KeyEvent.VK_A: {
@@ -306,12 +303,13 @@ public class Game extends GameCore {
         if ((s1Y + s1height <= s2Y || s1Y >= s2Y + s2height))
             overlapY = false;
         if (overlapX && overlapY){
-            if (Math.signum(s1Xmid-s2Xmid)>=Math.signum(s1Ymid-s2Ymid))
+            float a = Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X)), b = Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y));
+            if (a<b)
                 c = 'x';
             else
                 c = 'y';
-            return true;
         }
+        s2.handleCollisionWithPlayer(s1, c, gravity);
         return false;
     }
     
@@ -384,14 +382,7 @@ public class Game extends GameCore {
         else if (s.getDirection() == 'l'){
             s.setVelocityX(-s.getSpeed());
         }
-//        else{
-//            player.setVelocityX(-0.25f);
-//        }
 
-
-        sxmid = s.getX() + swidth / 2;
-        symid = s.getY() + sheight / 2;
-        s.setGrounded(false);
         if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY() > 0) {
             if (gravity > 0)
                 s.setGrounded(true);
@@ -403,8 +394,10 @@ public class Game extends GameCore {
             if (gravity < 0)
                 s.setGrounded(true);
             s.setVelocityY(0);
-            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileWidth);
+            s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
         }
+        else if (s.getVelocityY() != 0 && s.isGrounded() && !s.isOnCrate())
+            s.setGrounded(false);
     }
 
 	public void keyReleased(KeyEvent e) {
