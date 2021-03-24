@@ -191,7 +191,8 @@ public class Game extends GameCore {
             s.update(elapsed);
             checkTileCollision(s, tmap);
             s.updateAnimations(gravity);
-            s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
+            if (!(s instanceof Bat))
+                s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
         }
 
         // Then check for any collisions that may have occurred

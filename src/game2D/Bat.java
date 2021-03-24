@@ -11,4 +11,9 @@ public class Bat extends Sprite{
     public Bat copy() throws CloneNotSupportedException {
         return (Bat) this.clone();
     }
+
+    @Override
+    public void handleCollisionWithPlayer(Sprite p, char c, float g) {
+
+    }
 }
