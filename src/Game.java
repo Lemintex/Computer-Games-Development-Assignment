@@ -31,7 +31,7 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim;
+    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
@@ -116,8 +116,12 @@ public class Game extends GameCore {
         initAnimations.add(initCoinAnim);
 
         initCrateAnim = new Animation();
-        initCrateAnim.loadAnimationFromSheet("images/crate/crate.png", 1, 1, 100);
+        initCrateAnim.loadAnimationFromSheet("images/crate/crate.png", 1, 1, 1000);
         initAnimations.add(initCrateAnim);
+
+        initActivatorAnim = new Animation();
+        initActivatorAnim.loadAnimationFromSheet("images/activator/released.png", 1, 1, 1000);
+        initAnimations.add(initActivatorAnim);
     }
 
     /**
@@ -191,16 +195,21 @@ public class Game extends GameCore {
             s.update(elapsed);
             checkTileCollision(s, tmap);
             s.updateAnimations(gravity);
-            if (!(s instanceof Bat))
+
+            if (!(s instanceof Bat|| (s instanceof Activator && gravity<0)))
                 s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
         }
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
 
-        for (Sprite s : spriteList) {
-            if (!(s instanceof Player))
-                boundingBoxCollision(player, s);
+        for (Sprite s1 : spriteList) {
+            if (!(s1 instanceof Player))
+                boundingBoxCollision(player, s1);
+            for(Sprite s2 : spriteList){
+                if (s1 instanceof Activator && s2 instanceof Crate)
+                    boundingBoxCollision(s1, s2);
+            }                
         }
         for (Sprite s : clouds)
             s.update(elapsed);
@@ -278,9 +287,8 @@ public class Game extends GameCore {
      * the given Sprite 's1'.
      * @param s1        The sprite to check collisions for
      * @param s2        The sprite to check collisions with
-     * @return          Do the sprites collide?
      */
-    public boolean boundingBoxCollision(Sprite s1, Sprite s2)
+    public void boundingBoxCollision(Sprite s1, Sprite s2)
     {
 
         boolean overlapX = true, overlapY = true;
@@ -299,9 +307,9 @@ public class Game extends GameCore {
         float s2Xmid = s2X + s2width/2;
         float s2Ymid = s2Y + s2height/2;
 
-        if ((s1X + s1width <= s2X || s1X >= s2X + s2width))
+        if ((s1X + s1width < s2X || s1X > s2X + s2width))
             overlapX = false;
-        if ((s1Y + s1height <= s2Y || s1Y >= s2Y + s2height))
+        if ((s1Y + s1height < s2Y || s1Y > s2Y + s2height))
             overlapY = false;
         if (overlapX && overlapY){
             float a = Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X)), b = Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y));
@@ -310,8 +318,10 @@ public class Game extends GameCore {
             else
                 c = 'y';
         }
-        s2.handleCollisionWithPlayer(s1, c, gravity);
-        return false;
+        if (s1 instanceof Activator && s2 instanceof Crate)
+            s1.handleCollisionWithCrate(s2, c, gravity);
+        else
+            s2.handleCollisionWithPlayer(s1, c, gravity);
     }
     
     /**

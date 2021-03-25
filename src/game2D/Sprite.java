@@ -486,10 +486,19 @@ public class Sprite implements Cloneable{
         //this will be used in polymorphism but has to be here
     }
 
-    public boolean isOnCrate(){
-        return false;
+    public void handleCollisionWithCrate(Sprite crate, char c, float g){
+        //this will be used in polymorphism but has to be here
     }
 
+    public boolean isOnCrate(){
+        return false;
+        }
+
     public void setOnCrate(boolean c){
+        //this will be used in polymorphism but has to be here
+    }
+
+    public void kill() {
+        //this will be used in polymorphism but has to be here
     }
 }
