@@ -179,7 +179,11 @@ public class TileMap
 							s = new Crate(initAnimations.get(3));
 							spritemap.put(ch, s);
 							break;
-					}
+						case "Activator":
+							s = new Activator(initAnimations.get(4));
+							spritemap.put(ch, s);
+							break;
+						}
 				}
 			}
 			
@@ -211,7 +215,7 @@ public class TileMap
 					for (int col=0; col<mapWidth && col<line.length(); col++) {
 						for (String s : spritemap.keySet()) {
 							if (line.charAt(col) == s.charAt(0)) {
-								Sprite sp = null;
+								Sprite sp;
 								sp = spritemap.get(s).copy();
 								sp.setPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);

@@ -9,10 +9,11 @@
 #t=pipetop.png
 #b=pipebot.png
 #d=dirt.png
-@P=Player
+@A=Activator
 @B=Bat
-@S=Coin
 @C=Crate
+@P=Player
+@S=Coin
 // The actual tile map is preceded by the #map line
 #map
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
@@ -29,5 +30,5 @@ d...............................................................................
 d.......d.........................................................................................dd...........................d
 d.....d...............dddd..................BBBBBBBBB..........................................................................d
 d.............BB...............................................................................................................d
-d.P.................CC.........................................................................................................d
+d.P.................C........A.................................................................................................d
 ddddd..ddddddd...dddddddddddddddddd....ddddddd.ddddddddddd..ddddddddddddddddd.....ddddddddddddd.........dddddddddddddddddddddddd
