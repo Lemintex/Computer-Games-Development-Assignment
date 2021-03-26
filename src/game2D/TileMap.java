@@ -183,6 +183,14 @@ public class TileMap
 							s = new Activator(initAnimations.get(4));
 							spritemap.put(ch, s);
 							break;
+						case "Spikes":
+							s = new Spikes(initAnimations.get(5));
+							spritemap.put(ch, s);
+							break;
+						case "LaserGate":
+							s = new LaserGate(initAnimations.get(6));
+							spritemap.put(ch, s);
+							break;	
 						}
 				}
 			}
@@ -217,7 +225,12 @@ public class TileMap
 							if (line.charAt(col) == s.charAt(0)) {
 								Sprite sp;
 								sp = spritemap.get(s).copy();
+								if (sp instanceof Spikes && tmap[col][row-1].getCharacter() == '.')
+									sp.setRoof(false);
+								else
+									sp.setRoof(true);
 								sp.setPosition(col * tileWidth, row * tileHeight);
+								sp.setInitialPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
 							}

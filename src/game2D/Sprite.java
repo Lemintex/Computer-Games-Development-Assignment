@@ -401,14 +401,11 @@ public class Sprite implements Cloneable{
 
 
 	/**
-     * Hide the sprite.
+     * Updates the visibility of the sprite.
+     * 
+     * @param visible Should object be visible?
 	 */
-    public void hide()  {	render = false;  }
-
-	/**
-     * Show the sprite.
-	 */
-    public void show()  {  	render = true;   }
+    public void setVisible(boolean visible)  {	render = visible;  }
 
 	/**
      * Check the visibility status of the sprite.
@@ -499,6 +496,19 @@ public class Sprite implements Cloneable{
     }
 
     public void kill() {
+        //this will be used in polymorphism but has to be here
+    }
+
+    public void setRoof(boolean r){
+        //this will be used in polymorphism but has to be here
+    }
+
+    public boolean getRoof(){
+        //this will be used in polymorphism but has to be here
+        return false;
+    }
+
+    public void setInitialPosition(float x,float y){
         //this will be used in polymorphism but has to be here
     }
 }

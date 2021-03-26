@@ -13,12 +13,6 @@ public class LaserGate extends Sprite{
         toggleActivate = true;
         playerOn = false;
         crateOn = false;
-        loadAnimations();
-    }
-
-    public void loadAnimations(){
-        activatedAnim = new Animation();
-        activatedAnim.loadAnimationFromSheet("images/activator/pressed.png", 1, 1, 1000);
     }
 
     public LaserGate copy() throws CloneNotSupportedException {
@@ -28,7 +22,6 @@ public class LaserGate extends Sprite{
     public void handleCollisionWithPlayer(Sprite p, char c, float g){
         if (c == 'y' || c == 'x')
             p.kill();            
-        }
     }
 
     public void activate(boolean a){

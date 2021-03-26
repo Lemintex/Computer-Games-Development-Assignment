@@ -31,11 +31,12 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim;
+    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim, initSpikesAnim, initLaserAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> clouds = new ArrayList<Sprite>();
     ArrayList<Sprite> spriteList = new ArrayList<>();
+    ArrayList<LaserGate> laserGateList = new ArrayList<>();
     ArrayList<LinkedList> backgroundList = new ArrayList<>();
 
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
@@ -66,7 +67,17 @@ public class Game extends GameCore {
         initialiseAnimations();
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
-
+        for (Sprite sprite: spriteList){
+            if(sprite instanceof LaserGate)
+                laserGateList.add((LaserGate)sprite);
+        }
+        for (Sprite sprite: spriteList){
+			if(sprite instanceof Activator){
+                Activator a;
+                a = (Activator) sprite;
+                a.getLaserGates(laserGateList);
+            }
+        }
         for (Sprite sprite: spriteList)
             if (sprite instanceof Player) {
                 player = (Player) sprite;
@@ -93,7 +104,7 @@ public class Game extends GameCore {
         	s.setX(screenWidth + (int)(Math.random()*200.0f));
         	s.setY(30 + (int)(Math.random()*150.0f));
         	s.setVelocityX(-0.02f);
-        	s.show();
+        	s.setVisible(true);
         	clouds.add(s);
         }
 
@@ -122,6 +133,14 @@ public class Game extends GameCore {
         initActivatorAnim = new Animation();
         initActivatorAnim.loadAnimationFromSheet("images/activator/released.png", 1, 1, 1000);
         initAnimations.add(initActivatorAnim);
+
+        initSpikesAnim = new Animation();
+        initSpikesAnim.loadAnimationFromSheet("images/spikes/spikes.png", 1, 1, 1000);
+        initAnimations.add(initSpikesAnim);
+
+        initLaserAnim = new Animation();
+        initLaserAnim.loadAnimationFromSheet("images/laser/laser.png", 1, 1, 1000);
+        initAnimations.add(initLaserAnim);
     }
 
     /**
@@ -196,7 +215,7 @@ public class Game extends GameCore {
             checkTileCollision(s, tmap);
             s.updateAnimations(gravity);
 
-            if (!(s instanceof Bat|| (s instanceof Activator && gravity<0)))
+            if (!(s instanceof Bat || (s instanceof Activator && gravity<0) ||(s instanceof Spikes && (s.getRoof() || s.isGrounded()) || s instanceof LaserGate)))
                 s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
         }
 
@@ -454,7 +473,7 @@ public class Game extends GameCore {
                 Sprite s = new Sprite(bg, bgSpeed/100);
                 s.setX(0+j*s.getWidth());
                 s.setY(0);
-                s.show();
+                s.setVisible(true);
                 bgList.add(s);
             }
             return bgList;

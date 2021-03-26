@@ -168,6 +168,9 @@ public class Animation {
      */
     public boolean hasLooped() { return looped; }
     
+    public void setLooped(boolean l){
+        looped = l;
+    }
     /**
      * Loads a complete animation from an animation sheet and adds each
      * frame in the sheet to the animation with the given frameDuration.

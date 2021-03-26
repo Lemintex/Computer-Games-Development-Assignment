@@ -3,7 +3,8 @@ package game2D;
 public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
-    boolean onCrate;
+    boolean onCrate, respawn;
+    float initX, initY;
     /**
      * Creates a new Sprite object with the specified Animation.
      *
@@ -14,6 +15,7 @@ public class Player extends Sprite {//implements Cloneable{
         super(anim, s);
         playerIdle = anim;
         onCrate = false;
+        respawn = false;
     }
 
     public void loadAnimations(){
@@ -28,9 +30,13 @@ public class Player extends Sprite {//implements Cloneable{
 
         playerDying = new Animation();
         playerDying.loadAnimationFromSheet("images/player/die.png", 3, 2, 100);
+        // playerDying.setLoop(false);
     }
 
     public void updateAnimations(float gravity){
+        if(respawn && playerDying.hasLooped()){
+            respawn();
+        }
         if (super.isGrounded()) {
             if (super.getVelocityX() == 0)
                 super.setAnimation(playerIdle);
@@ -46,6 +52,13 @@ public class Player extends Sprite {//implements Cloneable{
     public void kill(){
         super.setAnimation(playerDying);
         super.setVelocityX(0);
+        respawn = true;
+    }
+
+    public void respawn(){
+        super.setPosition(initX, initY);
+        playerDying.setLooped(false);
+        respawn = false;
     }
 
     public Player copy() throws CloneNotSupportedException {
@@ -53,8 +66,9 @@ public class Player extends Sprite {//implements Cloneable{
         return (Player) this.clone();
     }
 
-    public void handlePlayerCollision(){
-        //this will be used in polymorphism but has to be here
+    public void setInitialPosition(float x, float y){
+        initX = x;
+        initY = y;
     }
 
     public boolean isOnCrate(){

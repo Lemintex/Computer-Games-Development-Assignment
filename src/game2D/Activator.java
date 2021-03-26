@@ -1,11 +1,14 @@
 package game2D;
 
+import java.util.ArrayList;
+
 public class Activator extends Sprite{
 
     Animation deactivatedAnim, activatedAnim;
     boolean activated, playerOn, crateOn;
     boolean toggleActivate;
-    
+    ArrayList<LaserGate> laserGates;
+
     public Activator(Animation anim) {
         super(anim, 0);
         deactivatedAnim = anim;
@@ -37,8 +40,8 @@ public class Activator extends Sprite{
         else if (c == 'n'){
             playerOn = false;
             if (!crateOn){
-                toggleActivate = true;
                 activate(false);
+                toggleActivate = true;
             }
             
         }
@@ -51,6 +54,7 @@ public class Activator extends Sprite{
             crate.setVelocityY(0);
             activate(true);
             toggleActivate = false;
+            crate.setGrounded(true);
         }
         else if (c == 'n'){
             crateOn = false;
@@ -62,12 +66,22 @@ public class Activator extends Sprite{
     }
 
     public void activate(boolean a){
-        if (a == activated)
+        if (a == toggleActivate)
             return;
         activated = !activated;
-        if (activated)
+        if (activated){
             super.setAnimation(activatedAnim);
-        else
+            for(LaserGate lg: laserGates)
+                lg.setVisible(false);
+        }
+        else{
             super.setAnimation(deactivatedAnim);
+            for(LaserGate lg: laserGates)
+                lg.setVisible(true);
+        }
+    }   
+
+    public void getLaserGates(ArrayList<LaserGate> laserGateList){
+        laserGates = laserGateList;        
     }
 }
