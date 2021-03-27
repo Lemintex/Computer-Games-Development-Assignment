@@ -31,7 +31,7 @@ public class Activator extends Sprite{
     public void handleCollisionWithPlayer(Sprite p, char c, float g){
         if (c == 'y' && g>0){
             playerOn = true;
-            p.setY(super.getY()-p.getHeight()+1);
+            p.setY(super.getY()-p.getHeight());
             p.setVelocityY(0);
             activate(true);
             toggleActivate = false;
@@ -40,21 +40,20 @@ public class Activator extends Sprite{
         else if (c == 'n'){
             playerOn = false;
             if (!crateOn){
-                activate(false);
                 toggleActivate = true;
+                activate(false);
             }
-            
+
         }
     }
 
     public void handleCollisionWithCrate(Sprite crate, char c, float g){
         if (c == 'y' && g>0){
             crateOn = true;
-            crate.setY(super.getY()-crate.getHeight()+1);
+            crate.setY(super.getY()-crate.getHeight());
             crate.setVelocityY(0);
             activate(true);
             toggleActivate = false;
-            crate.setGrounded(true);
         }
         else if (c == 'n'){
             crateOn = false;
@@ -65,8 +64,9 @@ public class Activator extends Sprite{
         }
     }
 
+
     public void activate(boolean a){
-        if (a == toggleActivate)
+        if (a == activated)
             return;
         activated = !activated;
         if (activated){

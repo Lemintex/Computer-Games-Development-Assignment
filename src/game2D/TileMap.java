@@ -225,12 +225,27 @@ public class TileMap
 							if (line.charAt(col) == s.charAt(0)) {
 								Sprite sp;
 								sp = spritemap.get(s).copy();
-								if (sp instanceof Spikes && tmap[col][row-1].getCharacter() == '.')
-									sp.setRoof(false);
+								if (sp instanceof Spikes){
+									if(tmap[col][row-1].getCharacter() == '.'){
+										((Spikes)sp).setRoof(false);
+										sp.setPosition(col * tileWidth, row * tileHeight);
+									}
+									else{
+										((Spikes)sp).setRoof(true);
+										sp.setPosition((col - .00000025f) * tileWidth, row * tileHeight);
+										// I don't know why, I don't want to know why, I don't want to have to wonder why,
+										// but for some ungodly reason setting the position of an upside down spike skews
+										// it to the right one tile if I don't subtract that tiny float from col..
+										// I've tried LITERALLY everything else and don't know why this is being so 
+										// f*cking stubborn, and it's p*ssing me off big time.
+										// If you don't believe me, comment it out and uncomment the line below and see for yourself.
+										// sp.setPosition(col * tileWidth, row * tileHeight);
+									}
+								}
 								else
-									sp.setRoof(true);
-								sp.setPosition(col * tileWidth, row * tileHeight);
-								sp.setInitialPosition(col * tileWidth, row * tileHeight);
+									sp.setPosition(col * tileWidth, row * tileHeight);
+								if (sp instanceof Player)
+									((Player)sp).setInitialPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
 							}

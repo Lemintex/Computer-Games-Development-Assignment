@@ -13,7 +13,7 @@ public class Spikes extends Sprite{
         return (Spikes) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Sprite p, char c, float g){
+    public void handleCollisionWithPlayer(Player p, char c, float g){
         if (c == 'y' || c == 'x'){
             p.kill();
         }

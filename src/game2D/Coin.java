@@ -1,5 +1,7 @@
 package game2D;
 
+import java.util.ArrayList;
+
 public class Coin extends Sprite{
 
     Animation coinRotate;
@@ -10,5 +12,12 @@ public class Coin extends Sprite{
 
     public Coin copy() throws CloneNotSupportedException {
         return (Coin) this.clone();
+    }
+
+    public boolean hitCoin(char c){
+        if (c == 'y' || c == 'x'){
+            return true;
+        }        
+        return false;
     }
 }

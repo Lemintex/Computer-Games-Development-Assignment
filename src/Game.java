@@ -34,7 +34,7 @@ public class Game extends GameCore {
     Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim, initSpikesAnim, initLaserAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
-    ArrayList<Sprite> clouds = new ArrayList<Sprite>();
+    ArrayList<Sprite> removeSprites = new ArrayList<Sprite>();
     ArrayList<Sprite> spriteList = new ArrayList<>();
     ArrayList<LaserGate> laserGateList = new ArrayList<>();
     ArrayList<LinkedList> backgroundList = new ArrayList<>();
@@ -63,7 +63,6 @@ public class Game extends GameCore {
      */
     public void init()
     {         
-        Sprite s;	// Temporary reference to a sprite
         initialiseAnimations();
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
@@ -96,18 +95,6 @@ public class Game extends GameCore {
         ca.addFrame(loadImage("images/cloud.png"), 1000);
 
         loadAllBackgrounds(backgroundList, level1Backgrounds, "level1/");
-        // Create 3 clouds at random positions off the screen
-        // to the right
-        for (int c=0; c<3; c++)
-        {
-        	s = new Sprite(ca, 0.03f);
-        	s.setX(screenWidth + (int)(Math.random()*200.0f));
-        	s.setY(30 + (int)(Math.random()*150.0f));
-        	s.setVelocityX(-0.02f);
-        	s.setVisible(true);
-        	clouds.add(s);
-        }
-
         initialiseGame();
       		
         System.out.println(tmap);
@@ -194,9 +181,10 @@ public class Game extends GameCore {
         tmap.draw(g,xo,yo);    
         
         // Show score and status information
-        String msg = String.format("Score: %d", total/100);
-        g.setColor(Color.darkGray);
-        g.drawString(msg, getWidth() - 80, 50);
+        String msg = String.valueOf(total);
+        g.setColor(Color.YELLOW);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 60));
+        g.drawString(msg, 75, getHeight()-75);;
     }
 
     /**
@@ -213,9 +201,10 @@ public class Game extends GameCore {
         for (Sprite s: spriteList) {
             s.update(elapsed);
             checkTileCollision(s, tmap);
-            s.updateAnimations(gravity);
+            if (s instanceof Player)
+                ((Player)s).updateAnimations(gravity);
 
-            if (!(s instanceof Bat || (s instanceof Activator && gravity<0) ||(s instanceof Spikes && (s.getRoof() || s.isGrounded()) || s instanceof LaserGate)))
+            if (!(s instanceof Bat || (s instanceof Activator && gravity<0) ||(s instanceof Spikes && (((Spikes)s).getRoof() || s.isGrounded()) || s instanceof LaserGate)))
                 s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
         }
 
@@ -230,8 +219,9 @@ public class Game extends GameCore {
                     boundingBoxCollision(s1, s2);
             }                
         }
-        for (Sprite s : clouds)
-            s.update(elapsed);
+        for(Sprite s: removeSprites)
+            spriteList.remove(s);
+        removeSprites.clear();
     }
     
     /**
@@ -285,7 +275,7 @@ public class Game extends GameCore {
                 break;
             }
             case KeyEvent.VK_SPACE: {
-                if (player.isGrounded()) {
+                if (player.isGrounded() && !player.isOnCrate()) {
                     gravity = -gravity;
                     player.setScaleY((float) -player.getScaleY());
                     player.setGrounded(false);
@@ -338,9 +328,19 @@ public class Game extends GameCore {
                 c = 'y';
         }
         if (s1 instanceof Activator && s2 instanceof Crate)
-            s1.handleCollisionWithCrate(s2, c, gravity);
+            s1.handleCollisionWithCrate((Crate)s2, c, gravity);
+        else if (s1 instanceof Player){
+            if (s2 instanceof Coin){
+                Coin coin = (Coin) s2;
+                if(coin.hitCoin(c)){
+                    total++;
+                    removeSprites.add(coin);
+                    coin.setVisible(false);
+                }
+            }
         else
-            s2.handleCollisionWithPlayer(s1, c, gravity);
+            s2.handleCollisionWithPlayer((Player)s1, c, gravity);
+        }
     }
     
     /**
@@ -392,7 +392,8 @@ public class Game extends GameCore {
         int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight / 2);
         BL = tmap.getTileChar(BLxtile, BLytile);
         boolean leftWall = false, rightWall = false;
-
+        if (BR!='.' && TL !='.' && s instanceof Player)
+            ((Player)s).kill();
         if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){
             rightWall = true;
             if (s.getDirection() == 'r')
@@ -426,8 +427,6 @@ public class Game extends GameCore {
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
         }
-        else if (s.getVelocityY() != 0 && s.isGrounded() && !s.isOnCrate())
-            s.setGrounded(false);
     }
 
 	public void keyReleased(KeyEvent e) {

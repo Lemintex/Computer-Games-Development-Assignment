@@ -19,8 +19,8 @@ public class LaserGate extends Sprite{
         return (LaserGate) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Sprite p, char c, float g){
-        if (c == 'y' || c == 'x')
+    public void handleCollisionWithPlayer(Player p, char c, float g){
+        if ((c == 'y' || c == 'x') && super.isVisible())
             p.kill();            
     }
 

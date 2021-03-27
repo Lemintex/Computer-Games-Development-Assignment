@@ -12,7 +12,7 @@ public class Crate extends Sprite{
         return (Crate) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Sprite p, char c, float g){
+    public void handleCollisionWithPlayer(Player p, char c, float g){
         if (c == 'x') {
             super.setVelocityX(p.getVelocityX());
             if (p.getVelocityX()>0)
@@ -26,7 +26,7 @@ public class Crate extends Sprite{
             else
                 p.setY(super.getY()+super.getHeight()-1);
             p.setVelocityY(0);
-            p.setGrounded(true);
+            p.setGrounded(false);
             p.setOnCrate(true);
         }
         else if (c == 'n'){

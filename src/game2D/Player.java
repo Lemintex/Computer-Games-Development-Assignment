@@ -37,7 +37,7 @@ public class Player extends Sprite {//implements Cloneable{
         if(respawn && playerDying.hasLooped()){
             respawn();
         }
-        if (super.isGrounded()) {
+        if (super.isGrounded() || onCrate) {
             if (super.getVelocityX() == 0)
                 super.setAnimation(playerIdle);
             else
@@ -47,6 +47,17 @@ public class Player extends Sprite {//implements Cloneable{
             super.setAnimation(playerJumping);
         else if ((Math.signum(gravity) == Math.signum(getVelocityY()) && gravity != 0 && !super.isGrounded()))
             super.setAnimation(playerFalling);
+    }
+
+    
+    public void jump(float force, float gravity){
+        if (onCrate || super.isGrounded()){
+            if (gravity > 0)
+                super.setVelocityY(-force);
+            else if (gravity < 0)
+                super.setVelocityY(force);
+            super.setGrounded(false);
+        }
     }
 
     public void kill(){

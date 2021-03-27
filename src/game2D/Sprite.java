@@ -449,18 +449,6 @@ public class Sprite implements Cloneable{
         return ground;
     }
 
-
-
-    public void jump(float force, float gravity){
-            if (gravity > 0 && ground){
-                this.dy = -force;
-                ground = false;
-            }
-            else if (gravity < 0 && ground){
-                this.dy = force;
-                ground = false;
-            }
-    }
     public char getDirection(){return direction;}
 
     public void setDirection(char d){
@@ -471,44 +459,19 @@ public class Sprite implements Cloneable{
         //this will be used in polymorphism but has to be here
     }
 
-    public void updateAnimations(float g){
-        //this will be used in polymorphism but has to be here
-    }
-
     public Sprite copy() throws CloneNotSupportedException {
         return (Sprite) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Sprite p, char c, float g){
+    public void handleCollisionWithPlayer(Player p, char c, float g){
         //this will be used in polymorphism but has to be here
     }
 
-    public void handleCollisionWithCrate(Sprite crate, char c, float g){
-        //this will be used in polymorphism but has to be here
-    }
-
-    public boolean isOnCrate(){
-        return false;
-        }
-
-    public void setOnCrate(boolean c){
+    public void handleCollisionWithCrate(Crate crate, char c, float g){
         //this will be used in polymorphism but has to be here
     }
 
     public void kill() {
-        //this will be used in polymorphism but has to be here
-    }
-
-    public void setRoof(boolean r){
-        //this will be used in polymorphism but has to be here
-    }
-
-    public boolean getRoof(){
-        //this will be used in polymorphism but has to be here
-        return false;
-    }
-
-    public void setInitialPosition(float x,float y){
         //this will be used in polymorphism but has to be here
     }
 }
