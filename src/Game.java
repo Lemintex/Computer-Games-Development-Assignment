@@ -31,18 +31,19 @@ public class Game extends GameCore {
     int xo = 0, yo = 0;
 
     // Game resources
-    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim, initSpikesAnim, initLaserAnim;
+    Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim, initSpikesAnim, initLaserAnim, initSlimeAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> removeSprites = new ArrayList<Sprite>();
     ArrayList<Sprite> spriteList = new ArrayList<>();
     ArrayList<LaserGate> laserGateList = new ArrayList<>();
-    ArrayList<LinkedList> backgroundList = new ArrayList<>();
+    ArrayList<LinkedList> backgroundList = new ArrayList<>();   
 
     TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
     
     long total;         			// The score will be the total time elapsed since a crash
     String[] level1Backgrounds = {"layer07_Sky", "layer06_Rocks", "layer05_Clouds", "layer04_Hills_2", "layer03_Hills_1", "layer02_Trees", "layer01_Ground"};
+    String[] musicLevel = {"sounds/music.wav"};
 
     /**
 	 * The obligatory main method that creates
@@ -66,6 +67,8 @@ public class Game extends GameCore {
         initialiseAnimations();
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
+        Sound music = new Sound(musicLevel[0], true);
+        music.start();
         for (Sprite sprite: spriteList){
             if(sprite instanceof LaserGate)
                 laserGateList.add((LaserGate)sprite);
@@ -100,13 +103,17 @@ public class Game extends GameCore {
         System.out.println(tmap);
     }
 
+    public void musicPlay(String filename){
+
+    }
+
     public void initialiseAnimations(){
         initPlayerAnim = new Animation();
         initPlayerAnim.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
         initAnimations.add(initPlayerAnim);
 
         initBatAnim = new Animation();
-        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 5, 1, 500);
+        initBatAnim.loadAnimationFromSheet("images/bat/fly.png", 5, 1, 100);
         initAnimations.add(initBatAnim);
 
         initCoinAnim = new Animation();
@@ -128,6 +135,10 @@ public class Game extends GameCore {
         initLaserAnim = new Animation();
         initLaserAnim.loadAnimationFromSheet("images/laser/laser.png", 1, 1, 1000);
         initAnimations.add(initLaserAnim);
+
+        initSlimeAnim = new Animation();
+        initSlimeAnim.loadAnimationFromSheet("images/slime/idle.png", 2, 2, 200);
+        initAnimations.add(initSlimeAnim);
     }
 
     /**
@@ -171,6 +182,7 @@ public class Game extends GameCore {
         {
         	s.setOffsets(xo,yo);
         	s.drawTransformed(g);
+            s.drawBoundingBox(g);
         }
 
         // Apply offsets to player and draw 
@@ -392,8 +404,6 @@ public class Game extends GameCore {
         int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight / 2);
         BL = tmap.getTileChar(BLxtile, BLytile);
         boolean leftWall = false, rightWall = false;
-        if (BR!='.' && TL !='.' && s instanceof Player)
-            ((Player)s).kill();
         if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){
             rightWall = true;
             if (s.getDirection() == 'r')

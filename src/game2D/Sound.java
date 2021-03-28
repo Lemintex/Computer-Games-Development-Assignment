@@ -7,10 +7,11 @@ public class Sound extends Thread {
 
 	String filename;	// The name of the file to play
 	boolean finished;	// A flag showing that the thread has finished
-	
-	public Sound(String fname) {
+	boolean loop;
+	public Sound(String fname, boolean l) {
 		filename = fname;
 		finished = false;
+		loop = l;
 	}
 
 	/**
@@ -21,6 +22,7 @@ public class Sound extends Thread {
 	 * the process scheduler.
 	 */
 	public void run() {
+
 		try {
 			File file = new File(filename);
 			AudioInputStream stream = AudioSystem.getAudioInputStream(file);
@@ -28,13 +30,17 @@ public class Sound extends Thread {
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
 			Clip clip = (Clip)AudioSystem.getLine(info);
 			clip.open(stream);
-			clip.start();
+			if (loop)
+				clip.loop(clip.LOOP_CONTINUOUSLY);
+			else
+				clip.start();
 			Thread.sleep(100);
-			while (clip.isRunning()) { Thread.sleep(100); }
-			clip.close();
+			while (clip.isRunning()) { Thread.sleep(10); }
+				// if (!loop)
+				clip.close();
 		}
 		catch (Exception e) {	}
-		finished = true;
+			finished = true;
 
 	}
 }

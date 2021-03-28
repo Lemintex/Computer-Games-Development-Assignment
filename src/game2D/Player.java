@@ -3,7 +3,7 @@ package game2D;
 public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
-    boolean onCrate, respawn;
+    boolean onCrate, respawn, dying;
     float initX, initY;
     /**
      * Creates a new Sprite object with the specified Animation.
@@ -16,6 +16,7 @@ public class Player extends Sprite {//implements Cloneable{
         playerIdle = anim;
         onCrate = false;
         respawn = false;
+        dying = false;
     }
 
     public void loadAnimations(){
@@ -34,8 +35,10 @@ public class Player extends Sprite {//implements Cloneable{
     }
 
     public void updateAnimations(float gravity){
-        if(respawn && playerDying.hasLooped()){
-            respawn();
+        if(respawn && super.getAnimation() == playerDying){
+            if (playerDying.hasLooped())
+                respawn();
+            return;
         }
         if (super.isGrounded() || onCrate) {
             if (super.getVelocityX() == 0)
@@ -52,6 +55,8 @@ public class Player extends Sprite {//implements Cloneable{
     
     public void jump(float force, float gravity){
         if (onCrate || super.isGrounded()){
+            Sound jumpSound = new Sound("sounds/playerJump.wav", false);
+            jumpSound.start();
             if (gravity > 0)
                 super.setVelocityY(-force);
             else if (gravity < 0)
@@ -60,16 +65,38 @@ public class Player extends Sprite {//implements Cloneable{
         }
     }
 
+    public void setVelocity(float dx, float dy){
+        if (!dying)
+            super.setVelocity(dx, dy);
+    }
+
+    public void setVelocityX(float dx){
+        if (!dying)
+            super.setVelocityX(dx);
+    }
+
+    public void setVelocityY(float dy){
+        if (!dying)
+            super.setVelocityY(dy);
+    }
     public void kill(){
+        if(!respawn){
+        dying = true;
+        Sound killSound = new Sound("sounds/playerDeath.wav", false);
+        killSound.start();
         super.setAnimation(playerDying);
-        super.setVelocityX(0);
+        super.setDirection('i');
+        super.setVelocity(0, 0);
+        super.setGrounded(false);
         respawn = true;
+        }
     }
 
     public void respawn(){
         super.setPosition(initX, initY);
         playerDying.setLooped(false);
         respawn = false;
+        dying = false;
     }
 
     public Player copy() throws CloneNotSupportedException {

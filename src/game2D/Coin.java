@@ -1,7 +1,5 @@
 package game2D;
 
-import java.util.ArrayList;
-
 public class Coin extends Sprite{
 
     Animation coinRotate;
@@ -16,6 +14,8 @@ public class Coin extends Sprite{
 
     public boolean hitCoin(char c){
         if (c == 'y' || c == 'x'){
+            Sound coinSound = new Sound("sounds/coinCollect.wav", false);
+            coinSound.start();
             return true;
         }        
         return false;

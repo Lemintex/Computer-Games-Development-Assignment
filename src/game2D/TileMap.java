@@ -190,7 +190,11 @@ public class TileMap
 						case "LaserGate":
 							s = new LaserGate(initAnimations.get(6));
 							spritemap.put(ch, s);
-							break;	
+							break;
+						case "Slime":
+							s = new Slime(initAnimations.get(7));
+							spritemap.put(ch, s);
+							break;
 						}
 				}
 			}
@@ -248,6 +252,7 @@ public class TileMap
 									((Player)sp).setInitialPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
+								
 							}
 						}
 							if (spritemap.containsKey(String.valueOf(line.charAt(col))))
