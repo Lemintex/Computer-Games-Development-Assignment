@@ -281,8 +281,8 @@ public class Sprite implements Cloneable{
     {
     	scaleX = x;
     	xoff = 0;
-        if (getScaleX() < 0){
-            xoff = getWidth();
+        if (scaleX < 0){
+            xoff = (int)width;
         }
     }
 
@@ -290,8 +290,8 @@ public class Sprite implements Cloneable{
     {
         scaleY = y;
         yoff = 0;
-        if (getScaleY() < 0){
-            yoff = getHeight();
+        if (scaleY < 0){
+            yoff = (int)height;
         }
     }
 
@@ -362,9 +362,15 @@ public class Sprite implements Cloneable{
     public void drawBoundingBox(Graphics2D g)
     {
     	if (!render) return;
-
+        int tempX = 0, tempY = 0;
 		Image img = getImage();
-    	g.drawRect((int)x,(int)y,img.getWidth(null),img.getHeight(null));
+        if (scaleX < 0){
+            tempX = (int)width;
+        }
+        if (scaleY<0){
+            tempY = (int)height;
+        }
+    	g.drawRect((int)x+xoff-tempX,(int)y+yoff-tempY,img.getWidth(null),img.getHeight(null));
     }
     
     /**
@@ -472,6 +478,14 @@ public class Sprite implements Cloneable{
     }
 
     public void kill() {
+        //this will be used in polymorphism but has to be here
+    }
+
+    public void respawn(){
+
+    }
+
+    public void move(char edge){
         //this will be used in polymorphism but has to be here
     }
 }

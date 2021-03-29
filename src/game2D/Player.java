@@ -79,6 +79,7 @@ public class Player extends Sprite {//implements Cloneable{
         if (!dying)
             super.setVelocityY(dy);
     }
+
     public void kill(){
         if(!respawn){
         dying = true;
@@ -115,5 +116,12 @@ public class Player extends Sprite {//implements Cloneable{
 
     public void setOnCrate(boolean c){
         onCrate = c;
+    }
+
+    public boolean getRespawn(){
+        if(respawn){
+            return true;
+        }
+        return false;
     }
 }

@@ -6,6 +6,7 @@ public class Bat extends Sprite{
     public Bat(Animation anim, float s) {
         super(anim, 0);
         batAngry = anim;
+        loadAnimations();
     }
 
     public void loadAnimations(){

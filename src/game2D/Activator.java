@@ -5,8 +5,7 @@ import java.util.ArrayList;
 public class Activator extends Sprite{
 
     Animation deactivatedAnim, activatedAnim;
-    boolean activated, playerOn, crateOn;
-    boolean toggleActivate;
+    boolean activated, playerOn, crateOn, onRoof, toggleActivate;
     ArrayList<LaserGate> laserGates;
 
     public Activator(Animation anim) {
@@ -16,6 +15,7 @@ public class Activator extends Sprite{
         toggleActivate = true;
         playerOn = false;
         crateOn = false;
+        onRoof = false;
         loadAnimations();
     }
 
@@ -82,6 +82,16 @@ public class Activator extends Sprite{
     }   
 
     public void getLaserGates(ArrayList<LaserGate> laserGateList){
-        laserGates = laserGateList;        
+        laserGates = laserGateList;
+    }
+
+    public void setOnRoof(boolean r){
+        onRoof = r;
+        if (onRoof)
+            super.setRotation(180);
+    }
+
+    public boolean isOnRoof(){
+        return onRoof;
     }
 }

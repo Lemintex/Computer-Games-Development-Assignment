@@ -35,7 +35,7 @@ public class Game extends GameCore {
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
     Player player = null;
     ArrayList<Sprite> removeSprites = new ArrayList<Sprite>();
-    ArrayList<Sprite> spriteList = new ArrayList<>();
+    ArrayList<Sprite> spriteList = new ArrayList<Sprite>();
     ArrayList<LaserGate> laserGateList = new ArrayList<>();
     ArrayList<LinkedList> backgroundList = new ArrayList<>();   
 
@@ -68,7 +68,7 @@ public class Game extends GameCore {
         // Load the tile map and print it out so we can check it is valid
         tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
         Sound music = new Sound(musicLevel[0], true);
-        music.start();
+        // music.start();
         for (Sprite sprite: spriteList){
             if(sprite instanceof LaserGate)
                 laserGateList.add((LaserGate)sprite);
@@ -137,7 +137,7 @@ public class Game extends GameCore {
         initAnimations.add(initLaserAnim);
 
         initSlimeAnim = new Animation();
-        initSlimeAnim.loadAnimationFromSheet("images/slime/idle.png", 2, 2, 200);
+        initSlimeAnim.loadAnimationFromSheet("images/slime/move.png", 2, 2, 200);
         initAnimations.add(initSlimeAnim);
     }
 
@@ -205,20 +205,59 @@ public class Game extends GameCore {
      * @param elapsed The elapsed time between this call and the previous call of elapsed
      */    
     public void update(long elapsed) {
+        if (player.getRespawn()){                   // Adding dead sprite(s) to this list theoretically
+            for (Sprite dead: removeSprites){       // works, but won't when actually running.
+                    spriteList.add(dead);           // The draw method for the re-added sprite(s)
+            }                                       // is called with no issues, but the sprite
+            removeSprites.clear();                  // is not drawn or collidable... So I am going
+        }                                           // to implement dead/alive as invisible/visible.
+                                                    // I don't WANT to do this, but Java has forced
+                                                    // my hand.
 
+                                                    // I fixed the issue, I wasn't resetting a flag.
+                                                    // Leaving this paragraph in though.
+        
         for (LinkedList<Sprite> l : backgroundList) {
             for (Sprite s : l)
                 s.update(elapsed);
             }
-        for (Sprite s: spriteList) {
-            s.update(elapsed);
-            checkTileCollision(s, tmap);
-            if (s instanceof Player)
-                ((Player)s).updateAnimations(gravity);
-
-            if (!(s instanceof Bat || (s instanceof Activator && gravity<0) ||(s instanceof Spikes && (((Spikes)s).getRoof() || s.isGrounded()) || s instanceof LaserGate)))
-                s.setVelocityY(s.getVelocityY() + (gravity * elapsed));
-        }
+            
+            // if (player.getRespawn()){
+            //     for (Sprite s: spriteList){
+            //         s.setVisible(false);
+            //     }
+            // }
+            for (Sprite s: spriteList) {
+                float gravityConstant = 0;
+                s.update(elapsed);
+                checkTileCollision(s, tmap);
+                if (s instanceof Player){
+                    ((Player)s).updateAnimations(gravity);
+                }
+                if (s instanceof Slime){
+                    if (((Slime)s).isDead()){
+                        removeSprites.add(s);
+                    }
+                    if (((Slime)s).isOnRoof()){
+                        gravityConstant = Math.signum(-gravity);
+                    }
+                    else{
+                        gravityConstant = Math.signum(gravity);
+                    }
+                }
+                else if(s instanceof Spikes){
+                    if (((Spikes)s).isOnRoof()){
+                        gravityConstant = Math.signum(-gravity);
+                    }
+                    else{
+                        gravityConstant = Math.signum(gravity);
+                    }
+                } 
+                else if (!(s instanceof Bat || (s instanceof Activator && gravity<0) || s instanceof LaserGate)){
+                    gravityConstant = 1;
+                }
+                s.setVelocityY(s.getVelocityY() + (gravityConstant * gravity * elapsed));   
+            }
 
         // Then check for any collisions that may have occurred
         handleScreenEdge(player, tmap, elapsed);
@@ -231,9 +270,10 @@ public class Game extends GameCore {
                     boundingBoxCollision(s1, s2);
             }                
         }
-        for(Sprite s: removeSprites)
-            spriteList.remove(s);
-        removeSprites.clear();
+        
+        for (Sprite dead: removeSprites){
+            spriteList.remove(dead);
+        }
     }
     
     /**
@@ -350,7 +390,7 @@ public class Game extends GameCore {
                     coin.setVisible(false);
                 }
             }
-        else
+        else if (s2.isVisible())// IS ALIVE?
             s2.handleCollisionWithPlayer((Player)s1, c, gravity);
         }
     }
@@ -403,7 +443,7 @@ public class Game extends GameCore {
         int BLXmid = (int) (tmap.getTileXC(BLxtile, BLytile) + tileWidth / 2);
         int BLYmid = (int) (tmap.getTileYC(BLxtile, BLytile) + tileHeight / 2);
         BL = tmap.getTileChar(BLxtile, BLytile);
-        boolean leftWall = false, rightWall = false;
+        boolean leftWall = false, rightWall = false, topFloor = false, bottomFloor = false;
         if (((TR != '.' && Math.abs(TRXmid - sxmid) >= Math.abs(TRYmid - symid) && TL == '.') || (BR != '.' && Math.abs(BRXmid - sxmid) >= Math.abs(BRYmid - symid) && BL == '.'))){
             rightWall = true;
             if (s.getDirection() == 'r')
@@ -425,18 +465,34 @@ public class Game extends GameCore {
         }
 
         if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY() > 0) {
-            if (gravity > 0)
+            bottomFloor = true;
+            if (gravity > 0){
                 s.setGrounded(true);
+            }
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
 
         }
         else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && !leftWall) || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && !rightWall)) && s.getVelocityY() < 0) {
-            if (gravity < 0)
+            topFloor = true;
+            if (gravity < 0){
                 s.setGrounded(true);
+            }
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
         }
+        else{
+            s.setGrounded(false);
+        }
+        Boolean onLeftEdge = (BL!='.' || TL!='.'), onRightEdge = (BR!='.' || TR!='.');
+        char edge = 'n';
+        if (onLeftEdge && !onRightEdge){
+            edge = 'r';
+        }
+        else if (onRightEdge && !onLeftEdge){
+            edge = 'l';
+        }
+        s.move(edge);
     }
 
 	public void keyReleased(KeyEvent e) {

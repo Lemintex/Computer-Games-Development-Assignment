@@ -229,13 +229,23 @@ public class TileMap
 							if (line.charAt(col) == s.charAt(0)) {
 								Sprite sp;
 								sp = spritemap.get(s).copy();
-								if (sp instanceof Spikes){
+								if (sp instanceof Spikes || sp instanceof Slime || sp instanceof Spikes){
 									if(tmap[col][row-1].getCharacter() == '.'){
-										((Spikes)sp).setRoof(false);
-										sp.setPosition(col * tileWidth, row * tileHeight);
+										if (sp instanceof Activator)
+											((Activator)sp).setOnRoof(false);
+										else if (sp instanceof Slime)
+											((Slime)sp).setOnRoof(false);
+										else if (sp instanceof Spikes)
+											((Spikes)sp).setOnRoof(false);
+									sp.setPosition(col * tileWidth, row * tileHeight);
 									}
 									else{
-										((Spikes)sp).setRoof(true);
+										if (sp instanceof Activator)
+											((Activator)sp).setOnRoof(true);
+										else if (sp instanceof Slime)
+											((Slime)sp).setOnRoof(true);
+										else if (sp instanceof Spikes)
+											((Spikes)sp).setOnRoof(true);
 										sp.setPosition((col - .00000025f) * tileWidth, row * tileHeight);
 										// I don't know why, I don't want to know why, I don't want to have to wonder why,
 										// but for some ungodly reason setting the position of an upside down spike skews
@@ -243,7 +253,7 @@ public class TileMap
 										// I've tried LITERALLY everything else and don't know why this is being so 
 										// f*cking stubborn, and it's p*ssing me off big time.
 										// If you don't believe me, comment it out and uncomment the line below and see for yourself.
-										// sp.setPosition(col * tileWidth, row * tileHeight);
+										// sp.setPosition(col * tileWidth, row * tileHeight);	
 									}
 								}
 								else
@@ -252,7 +262,6 @@ public class TileMap
 									((Player)sp).setInitialPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
-								
 							}
 						}
 							if (spritemap.containsKey(String.valueOf(line.charAt(col))))

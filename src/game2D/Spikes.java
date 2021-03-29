@@ -3,11 +3,11 @@ package game2D;
 public class Spikes extends Sprite{
 
     Animation spikeAnim;
-    boolean roof;
+    boolean onRoof;
     
     public Spikes(Animation anim) {
         super(anim, 0);
-        }
+      }
 
     public Spikes copy() throws CloneNotSupportedException {
         return (Spikes) this.clone();
@@ -19,13 +19,13 @@ public class Spikes extends Sprite{
         }
     }
 
-    public void setRoof(boolean r){
-        roof = r;
-        if (roof)
+    public void setOnRoof(boolean r){
+        onRoof = r;
+        if (onRoof)
             super.setRotation(180);
     }
 
-    public boolean getRoof(){
-        return roof;
+    public boolean isOnRoof(){
+        return onRoof;
     }
 }
