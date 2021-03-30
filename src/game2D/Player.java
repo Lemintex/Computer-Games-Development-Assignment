@@ -4,7 +4,6 @@ public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
     boolean onCrate, respawn, dying;
-    float initX, initY;
     /**
      * Creates a new Sprite object with the specified Animation.
      *
@@ -36,8 +35,9 @@ public class Player extends Sprite {//implements Cloneable{
 
     public void updateAnimations(float gravity){
         if(respawn && super.getAnimation() == playerDying){
-            if (playerDying.hasLooped())
+            if (playerDying.hasLooped()){
                 respawn();
+            }
             return;
         }
         if (super.isGrounded() || onCrate) {
@@ -65,9 +65,8 @@ public class Player extends Sprite {//implements Cloneable{
         }
     }
 
-    public void setVelocity(float dx, float dy){
-        if (!dying)
-            super.setVelocity(dx, dy);
+    public boolean flipGravity(){
+        return true;
     }
 
     public void setVelocityX(float dx){
@@ -96,6 +95,7 @@ public class Player extends Sprite {//implements Cloneable{
     public void respawn(){
         super.setPosition(initX, initY);
         playerDying.setLooped(false);
+        onCrate = false;
         respawn = false;
         dying = false;
     }
@@ -103,11 +103,6 @@ public class Player extends Sprite {//implements Cloneable{
     public Player copy() throws CloneNotSupportedException {
 //        super.clone();
         return (Player) this.clone();
-    }
-
-    public void setInitialPosition(float x, float y){
-        initX = x;
-        initY = y;
     }
 
     public boolean isOnCrate(){
@@ -119,9 +114,6 @@ public class Player extends Sprite {//implements Cloneable{
     }
 
     public boolean getRespawn(){
-        if(respawn){
-            return true;
-        }
-        return false;
+        return respawn;
     }
 }

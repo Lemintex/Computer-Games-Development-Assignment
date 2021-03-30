@@ -33,17 +33,19 @@ public class Game extends GameCore {
     // Game resources
     Animation initPlayerAnim, initBatAnim, initCoinAnim, initCrateAnim, initActivatorAnim, initSpikesAnim, initLaserAnim, initSlimeAnim;
     ArrayList<Animation> initAnimations = new ArrayList<Animation>();
-    Player player = null;
+    Player player;
     ArrayList<Sprite> removeSprites = new ArrayList<Sprite>();
     ArrayList<Sprite> spriteList = new ArrayList<Sprite>();
-    ArrayList<LaserGate> laserGateList = new ArrayList<>();
-    ArrayList<LinkedList> backgroundList = new ArrayList<>();   
-
-    TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
-    
-    long total;         			// The score will be the total time elapsed since a crash
+    ArrayList<LaserGate> laserGateList = new ArrayList<LaserGate>();
+    ArrayList<LinkedList<Sprite>> backgroundList = new ArrayList<LinkedList<Sprite>>();   
     String[] level1Backgrounds = {"layer07_Sky", "layer06_Rocks", "layer05_Clouds", "layer04_Hills_2", "layer03_Hills_1", "layer02_Trees", "layer01_Ground"};
     String[] musicLevel = {"sounds/music.wav"};
+
+    TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
+    String mapFolder = "maps";
+    String[] mapNames = {"level1.txt", "level2.txt"};
+    long total;         			// The score will be the total time elapsed since a crash
+    int currentLevel = 1;
 
     /**
 	 * The obligatory main method that creates
@@ -62,30 +64,41 @@ public class Game extends GameCore {
      * Initialise the class, e.g. set up variables, load images,
      * create animations, register event handlers
      */
-    public void init()
-    {         
-        initialiseAnimations();
-        // Load the tile map and print it out so we can check it is valid
-        tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
-        Sound music = new Sound(musicLevel[0], true);
-        // music.start();
+
+    public void loadLevel(){
+        removeSprites.clear();
+        spriteList.clear();
+        tmap.loadMap(mapFolder, mapNames[currentLevel - 1], initAnimations, spriteList);
         for (Sprite sprite: spriteList){
-            if(sprite instanceof LaserGate)
+            if(sprite instanceof LaserGate){
                 laserGateList.add((LaserGate)sprite);
+            }
         }
+
+        boolean p = false;
         for (Sprite sprite: spriteList){
-			if(sprite instanceof Activator){
+            if(sprite instanceof Activator){
                 Activator a;
                 a = (Activator) sprite;
                 a.getLaserGates(laserGateList);
             }
-        }
-        for (Sprite sprite: spriteList)
-            if (sprite instanceof Player) {
+            if (!p && sprite instanceof Player) {
                 player = (Player) sprite;
-//                spriteList.remove(sprite);
+                p = true;
                 break;
             }
+        }
+    }
+
+    public void init()
+    {         
+        initialiseAnimations();
+        // Load the tile map and print it out so we can check it is valid
+        // tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
+        loadLevel();
+        Sound music = new Sound(musicLevel[0], true);
+        // music.start();
+        
         setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
         setVisible(true);
 //        if (spriteList.contains(new Player))
@@ -183,6 +196,7 @@ public class Game extends GameCore {
         	s.setOffsets(xo,yo);
         	s.drawTransformed(g);
             s.drawBoundingBox(g);
+            s.drawBoundingCircle(g);
         }
 
         // Apply offsets to player and draw 
@@ -199,68 +213,78 @@ public class Game extends GameCore {
         g.drawString(msg, 75, getHeight()-75);;
     }
 
+    public void respawnAll(){
+        if (player.getRespawn()){                   
+            for (Sprite s: removeSprites){
+                spriteList.add(s);
+            }
+            removeSprites.clear();
+            for (Sprite s: spriteList){
+                if (!(s instanceof Player)){
+                    s.setPosition(s.getInitialX(), s.getInitialY());
+                }
+            }
+        }
+    }
+
     /**
      * Update any sprites and check for collisions
      * 
      * @param elapsed The elapsed time between this call and the previous call of elapsed
      */    
     public void update(long elapsed) {
-        if (player.getRespawn()){                   // Adding dead sprite(s) to this list theoretically
-            for (Sprite dead: removeSprites){       // works, but won't when actually running.
-                    spriteList.add(dead);           // The draw method for the re-added sprite(s)
-            }                                       // is called with no issues, but the sprite
-            removeSprites.clear();                  // is not drawn or collidable... So I am going
-        }                                           // to implement dead/alive as invisible/visible.
-                                                    // I don't WANT to do this, but Java has forced
-                                                    // my hand.
-
-                                                    // I fixed the issue, I wasn't resetting a flag.
-                                                    // Leaving this paragraph in though.
         
         for (LinkedList<Sprite> l : backgroundList) {
-            for (Sprite s : l)
+            for (Sprite s : l){
                 s.update(elapsed);
             }
+        }
             
-            // if (player.getRespawn()){
-            //     for (Sprite s: spriteList){
-            //         s.setVisible(false);
-            //     }
-            // }
-            for (Sprite s: spriteList) {
-                float gravityConstant = 0;
-                s.update(elapsed);
-                checkTileCollision(s, tmap);
-                if (s instanceof Player){
-                    ((Player)s).updateAnimations(gravity);
-                }
-                if (s instanceof Slime){
-                    if (((Slime)s).isDead()){
-                        removeSprites.add(s);
-                    }
-                    if (((Slime)s).isOnRoof()){
-                        gravityConstant = Math.signum(-gravity);
-                    }
-                    else{
-                        gravityConstant = Math.signum(gravity);
-                    }
-                }
-                else if(s instanceof Spikes){
-                    if (((Spikes)s).isOnRoof()){
-                        gravityConstant = Math.signum(-gravity);
-                    }
-                    else{
-                        gravityConstant = Math.signum(gravity);
-                    }
-                } 
-                else if (!(s instanceof Bat || (s instanceof Activator && gravity<0) || s instanceof LaserGate)){
-                    gravityConstant = 1;
-                }
-                s.setVelocityY(s.getVelocityY() + (gravityConstant * gravity * elapsed));   
+        for (Sprite s: spriteList) {
+            float gravityConstant = 0;
+            s.update(elapsed);
+            checkTileCollision(s, tmap);
+            if (s instanceof Player){
+                ((Player)s).updateAnimations(gravity);
             }
+            if (s instanceof Slime){
+                if (((Slime)s).isDead()){
+                    removeSprites.add(s);
+                }
+                if (((Slime)s).isOnRoof()){
+                    gravityConstant = Math.signum(-gravity);
+                }
+                else{
+                    gravityConstant = Math.signum(gravity);
+                }
+            }
+            else if(s instanceof Spikes){
+                if (((Spikes)s).isOnRoof()){
+                    gravityConstant = Math.signum(-gravity);
+                }
+                else{
+                    gravityConstant = Math.signum(gravity);
+                }
+            } 
+            else if (!(s instanceof Bat || (s instanceof Activator && gravity<0) || s instanceof LaserGate)){
+                gravityConstant = 1;
+            }
+            s.setVelocityY(s.getVelocityY() + (gravityConstant * gravity * elapsed));  
+                
+            // Then check for any collisions that may have occurred
+            if (handleScreenEdge(s, tmap, elapsed)){
+                if (s instanceof Player){
+                    s.kill();
+                }
+                else{
+                    removeSprites.add(s);
+                }
+            }
+        }
 
         // Then check for any collisions that may have occurred
-        handleScreenEdge(player, tmap, elapsed);
+        // if (handleScreenEdge(player, tmap, elapsed);
+
 
         for (Sprite s1 : spriteList) {
             if (!(s1 instanceof Player))
@@ -283,16 +307,16 @@ public class Game extends GameCore {
      * @param tmap		The tile map to check 
      * @param elapsed	How much time has gone by since the last call
      */
-    public void handleScreenEdge(Sprite s, TileMap tmap, long elapsed)
+    public boolean handleScreenEdge(Sprite s, TileMap tmap, long elapsed)
     {
     	// This method just checks if the sprite has gone off the bottom screen.
     	// Ideally you should use tile collision instead of this approach
     	
-        if (s.getY() + s.getHeight() > tmap.getPixelHeight())
+        if (Float.compare(s.getY() + s.getHeight(), tmap.getPixelHeight())>0 || s.getY()<0)
         {
-        	// Put the player back on the map 1 pixel above the bottom
-            initialiseGame();
+            return true;
         }
+        return false;
     }
     
     
@@ -353,48 +377,61 @@ public class Game extends GameCore {
     {
 
         boolean overlapX = true, overlapY = true;
-        char c = 'n';
         float s1X = s1.getX();
         float s1Y = s1.getY();
         int s1width = s1.getWidth();
         int s1height = s1.getHeight();
-        float s1Xmid = s1X + s1width/2;
-        float s1Ymid = s1Y + s1height/2;
 
         float s2X = s2.getX();
         float s2Y = s2.getY();
         int s2width = s2.getWidth();
         int s2height = s2.getHeight();
-        float s2Xmid = s2X + s2width/2;
-        float s2Ymid = s2Y + s2height/2;
 
         if ((s1X + s1width < s2X || s1X > s2X + s2width))
             overlapX = false;
         if ((s1Y + s1height < s2Y || s1Y > s2Y + s2height))
             overlapY = false;
         if (overlapX && overlapY){
-            float a = Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X)), b = Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y));
-            if (b>a)
+            char c = 'y';
+            if (Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y))>Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X))){
                 c = 'x';
-            else
+            }
+            else {
                 c = 'y';
-        }
-        if (s1 instanceof Activator && s2 instanceof Crate)
-            s1.handleCollisionWithCrate((Crate)s2, c, gravity);
-        else if (s1 instanceof Player){
-            if (s2 instanceof Coin){
-                Coin coin = (Coin) s2;
-                if(coin.hitCoin(c)){
-                    total++;
-                    removeSprites.add(coin);
-                    coin.setVisible(false);
+            }
+            if (s2 instanceof Crate || s2 instanceof LaserGate || boundingCircleCollision(s1, s2)){
+                if (s1 instanceof Activator && s2 instanceof Crate){
+                    s1.handleCollisionWithCrate((Crate)s2, c, gravity);
+                }
+                else if (s1 instanceof Player){
+                    if (s2 instanceof Coin){
+                        Coin coin = (Coin) s2;
+                        if(coin.hitCoin(c)){
+                            total++;
+                            removeSprites.add(coin);
+                            coin.setVisible(false);
+                        }
+                    }
+                    else{
+                        s2.handleCollisionWithPlayer((Player)s1, c, gravity);
+                    }
                 }
             }
-        else if (s2.isVisible())// IS ALIVE?
-            s2.handleCollisionWithPlayer((Player)s1, c, gravity);
+        }
+        else if(s2 instanceof Crate && s1 instanceof Player && s1.getVelocityX() == 0){
+            ((Crate)s2).stopCrate((Player)s1);
         }
     }
     
+    public boolean boundingCircleCollision(Sprite s1, Sprite s2){
+        double distance = Math.hypot(Math.abs(s1.getX() - s2.getX()), Math.abs(s1.getY() - s2.getY()));
+        // double distance = s1.getRadius() + s2.a
+        if (distance <= s1.getRadius() + s2.getRadius()){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check and handles collisions with a tile map for the
      * given sprite 's'. Initial functionality is limited...
@@ -466,7 +503,7 @@ public class Game extends GameCore {
 
         if (((BL != '.'/* && Math.abs(BLYmid - symid) >= Math.abs(BLXmid-sxmid)*/ && !leftWall) || (BR != '.'/* && Math.abs(BRYmid-symid) >= Math.abs(BLXmid-sxmid)*/ && !rightWall)) && s.getVelocityY() > 0) {
             bottomFloor = true;
-            if (gravity > 0){
+            if (gravity > 0 || (s instanceof Slime)){
                 s.setGrounded(true);
             }
             s.setVelocityY(0);
@@ -475,7 +512,7 @@ public class Game extends GameCore {
         }
         else if (((TL != '.'/* && Math.abs(TLYmid - symid) > Math.abs(TLXmid - sxmid)*/ && !leftWall) || (TR != '.'/* && Math.abs(TRYmid - symid) > Math.abs(TRXmid - sxmid)*/ && !rightWall)) && s.getVelocityY() < 0) {
             topFloor = true;
-            if (gravity < 0){
+            if (gravity < 0 || (s instanceof Slime)){
                 s.setGrounded(true);
             }
             s.setVelocityY(0);
@@ -486,10 +523,10 @@ public class Game extends GameCore {
         }
         Boolean onLeftEdge = (BL!='.' || TL!='.'), onRightEdge = (BR!='.' || TR!='.');
         char edge = 'n';
-        if (onLeftEdge && !onRightEdge){
+        if ((onLeftEdge && !onRightEdge) || rightWall){
             edge = 'r';
         }
-        else if (onRightEdge && !onLeftEdge){
+        else if ((onRightEdge && !onLeftEdge) || leftWall){
             edge = 'l';
         }
         s.move(edge);
@@ -522,7 +559,7 @@ public class Game extends GameCore {
 		}
 	}
 
-    public void loadAllBackgrounds(ArrayList<LinkedList> bgList, String[] filenames, String directory) {
+    public void loadAllBackgrounds(ArrayList<LinkedList<Sprite>> bgList, String[] filenames, String directory) {
         float bgSpeed = 0;
         for (String s : filenames) {
             bgList.add(loadBackgrounds("backgrounds/" + directory + s + ".png", bgSpeed));
@@ -544,7 +581,7 @@ public class Game extends GameCore {
             return bgList;
     }
 
-    public void drawParallaxSprites(Graphics2D g, ArrayList<LinkedList> spriteLists){
+    public void drawParallaxSprites(Graphics2D g, ArrayList<LinkedList<Sprite>> spriteLists){
         int iterator = 1;
         boolean swapL = false, swapR = false;
         float backgroundSpeed = 0f;
