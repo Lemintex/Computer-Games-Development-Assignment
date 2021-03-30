@@ -18,6 +18,9 @@ public class Sprite implements Cloneable{
     // Position (pixels)
     private float x, y;
 
+    // Respawn positon(pixels)
+    float initX, initY;
+
     // Velocity (pixels per millisecond)
     private float dx, dy, speed;
 
@@ -380,10 +383,15 @@ public class Sprite implements Cloneable{
     public void drawBoundingCircle(Graphics2D g)
     {
     	if (!render) return;
-
+        int tempX = 0, tempY = 0;
 		Image img = getImage();
-		
-    	g.drawArc((int)x,(int)y,img.getWidth(null),img.getHeight(null),0, 360);
+        if (scaleX < 0){
+            tempX = (int)width;
+        }
+        if (scaleY<0){
+            tempY = (int)height;
+        }
+    	g.drawArc((int)x+xoff-tempX,(int)y+yoff-tempY,img.getWidth(null),img.getHeight(null),0, 360);
     }
     
 	/**
@@ -487,5 +495,18 @@ public class Sprite implements Cloneable{
 
     public void move(char edge){
         //this will be used in polymorphism but has to be here
+    }
+
+    public void setInitialPosition(int x, int y){
+        initX = x;
+        initY = y;
+    }
+
+    public float getInitialX(){
+        return initX;
+    }
+
+    public float getInitialY(){
+        return initY;
     }
 }

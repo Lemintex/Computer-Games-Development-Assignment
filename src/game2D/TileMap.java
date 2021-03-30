@@ -256,10 +256,10 @@ public class TileMap
 										// sp.setPosition(col * tileWidth, row * tileHeight);	
 									}
 								}
-								else
+								else{
 									sp.setPosition(col * tileWidth, row * tileHeight);
-								if (sp instanceof Player)
-									((Player)sp).setInitialPosition(col * tileWidth, row * tileHeight);
+								}
+								sp.setInitialPosition(col * tileWidth, row * tileHeight);
 								sp.setVelocity(0, 0);
 								spriteList.add(sp);
 							}
@@ -434,9 +434,5 @@ public class TileMap
 				g.drawImage(img,xc,yc,null);
 			}
 		}		
-	}
-
-	public void loadSprite(ArrayList spriteList){
-
 	}
 }

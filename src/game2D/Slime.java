@@ -3,13 +3,19 @@ package game2D;
 public class Slime extends Sprite{
 
     Animation slimeMove, slimeDie;
-    boolean onRoof, dying;
+    boolean onRoof, dead, respawned;
     char memory;
     public Slime(Animation anim) {
         super(anim, 0.1f);
         slimeMove = anim;
         memory = 'a';
+        respawned = true;
+        load();
+    }
+
+    public void load(){
         loadAnimations();
+        initialiseMovement();
     }
 
     public void loadAnimations(){
@@ -19,16 +25,9 @@ public class Slime extends Sprite{
     }
 
     public void initialiseMovement(){
-        if (memory == 'r'){
-            setVelocityX(-super.getSpeed());
-        }
-        else{
-            setVelocityX(super.getSpeed());
-        }
+            setVelocityX(getSpeed());
     }
-    public void updateAnimations(){
-    }
-    
+
     public boolean isDead(){
         if (slimeDie.hasLooped()){
             resetSlime();
@@ -39,9 +38,17 @@ public class Slime extends Sprite{
     }
 
     public void resetSlime(){
-        dying = false;
+        dead = false;
         slimeDie.setLooped(false);
-        super.setAnimation(slimeMove);
+        setPosition(getInitialX(), getInitialY());
+        setAnimation(slimeMove);
+        setVelocityX(0);
+        if (onRoof){
+            setGrounded(true);
+        }
+        else {
+            setGrounded(false);
+        }
     }
 
     public Slime copy() throws CloneNotSupportedException {
@@ -49,35 +56,37 @@ public class Slime extends Sprite{
     }
 
     public void handleCollisionWithPlayer(Player p, char c, float g) {
-        if (c == 'y' && (Math.signum(g) == Math.signum(p.getVelocityY()))){
+        if (c == 'y' && (Math.signum(g) == Math.signum(p.getVelocityY()) && !dead && respawned)){
             kill();
             p.setVelocityY(g*-500);
         }
-        else if (!((c == 'n') || dying))
+        else if (!((c == 'n') || dead))
             p.kill();
     }
     public void move(char edge){
-        if (super.getVelocityX() == 0){
-            setVelocityX(super.getSpeed());
+        if (getVelocityX() == 0){
+            setVelocityX(getSpeed());
         }
-        if (!(edge == 'n' || edge == memory || dying)){
-            super.setDirection(memory);
+        if (!(edge == 'n' || edge == memory || dead)){
+            setDirection(memory);
             memory = edge;
-            setVelocityX(-super.getVelocityX());
-            super.setScaleX((float)-super.getScaleX());
+            setVelocityX(-getVelocityX());
+            setScaleX((float)-getScaleX());
         }
     }
 
     public void kill(){
-        dying = true;
         setVelocityX(0);
-        super.setAnimation(slimeDie);
+        dead = true;
+        super.setGrounded(false);
+        respawned = false;
+        setAnimation(slimeDie);
     }
 
     public void setOnRoof(boolean r){
         onRoof = r;
         if(onRoof){
-            super.setRotation(180);
+            setRotation(180);
         }
     }
 
@@ -86,8 +95,13 @@ public class Slime extends Sprite{
     }
 
     public void setVelocityX(float dx){
-        if (!dying || super.isGrounded())
+        if (!dead && (isGrounded() || onRoof)){
+            respawned = true;
             super.setVelocityX(dx);
+        }
     }
 
+    public void setGrounded(boolean g){
+        super.setGrounded(g);
+    }
 }
