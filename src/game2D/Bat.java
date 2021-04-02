@@ -6,19 +6,22 @@ public class Bat extends Sprite{
         super(anim, 0.125f);
     }
 
+    //SETS BAT MOVING
     public void initialiseMovement(){
         setVelocityX(getSpeed());
     }
 
+    //RETURNS COPY OF BAT
     public Bat copy() throws CloneNotSupportedException {
         return (Bat) this.clone();
     }
 
-    @Override
+    //KILL PLAYER IF COLLIDED WITH
     public void handleCollisionWithPlayer(Player p) {
         p.kill();
     }
 
+    //BAT MOVEMENT BRAIN
     public void move(boolean turn){
         if (getVelocityX() == 0){
             setVelocityX(getSpeed());

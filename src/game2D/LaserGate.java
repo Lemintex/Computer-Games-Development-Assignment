@@ -15,22 +15,25 @@ public class LaserGate extends Sprite{
         crateOn = false;
     }
 
+    //RETURNS CLOSE OF LASERGATE
     public LaserGate copy() throws CloneNotSupportedException {
         return (LaserGate) this.clone();
     }
 
+    //HANDLES COLLISION WITH PLAYER
     public void handleCollisionWithPlayer(Player p){
-        if (super.isVisible())
+        if (isVisible())
             p.kill();            
     }
 
+    //ACTIVATE LASERGATE
     public void activate(boolean a){
         if (a == activated)
             return;
         activated = !activated;
         if (activated)
-            super.setAnimation(activatedAnim);
+            setAnimation(activatedAnim);
         else
-            super.setAnimation(deactivatedAnim);
+            setAnimation(deactivatedAnim);
     }
 }

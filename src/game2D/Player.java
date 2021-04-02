@@ -31,46 +31,44 @@ public class Player extends Sprite {//implements Cloneable{
 
         playerDying = new Animation();
         playerDying.loadAnimationFromSheet("images/player/die.png", 3, 2, 100);
-        // playerDying.setLoop(false);
     }
 
     public void updateAnimations(float gravity){
-        if(dying && super.getAnimation() == playerDying){
+        if(dying && getAnimation() == playerDying){
             if (playerDying.hasLooped()){
                 respawn = true;
-                // respawn();
             }
             return;
         }
-        if (super.isGrounded() || onCrate) {
-            if (super.getVelocityX() == 0){
-                super.setAnimation(playerIdle);
+        if (isGrounded() || onCrate) {
+            if (getVelocityX() == 0){
+                setAnimation(playerIdle);
         }
         else{
-                super.setAnimation(playerRunning);
+                setAnimation(playerRunning);
             }
         }
-        else if (Math.signum(gravity) != Math.signum(super.getVelocityY()) && gravity != 0){
+        else if (Math.signum(gravity) != Math.signum(getVelocityY()) && gravity != 0){
             setAnimation(playerJumping);
         }
-        else if ((Math.signum(gravity) == Math.signum(getVelocityY()) && gravity != 0 && !super.isGrounded())){
-            super.setAnimation(playerFalling);
+        else if ((Math.signum(gravity) == Math.signum(getVelocityY()) && gravity != 0 && !isGrounded())){
+            setAnimation(playerFalling);
         }
         else{
-            super.setAnimation(playerIdle);
+            setAnimation(playerIdle);
         }
     }
 
     
     public void jump(float force, float gravity){
         if (onCrate || super.isGrounded()){
-            Sound jumpSound = new Sound("sounds/playerJump.wav", false);
+            Sound jumpSound = new Sound("sounds/playerJump.wav", false, false, false);
             jumpSound.start();
             if (gravity > 0)
-                super.setVelocityY(-force);
+                setVelocityY(-force);
             else if (gravity < 0)
-                super.setVelocityY(force);
-            super.setGrounded(false);
+                setVelocityY(force);
+            setGrounded(false);
             setOnCrate(false);
         }
     }
@@ -92,13 +90,12 @@ public class Player extends Sprite {//implements Cloneable{
     public void kill(){
         if(!dying && !godMode){
         dying = true;
-        Sound killSound = new Sound("sounds/playerDeath.wav", false);
+        Sound killSound = new Sound("sounds/playerDeath.wav", false, true, false);
         killSound.start();
-        super.setAnimation(playerDying);
-        super.setDirection('i');
-        super.setVelocity(0, 0);
-        super.setGrounded(false);
-        // respawn = true;
+        setAnimation(playerDying);
+        setDirection('i');
+        setVelocity(0, 0);
+        setGrounded(false);
         }
     }
 
@@ -112,7 +109,6 @@ public class Player extends Sprite {//implements Cloneable{
     }
 
     public Player copy() throws CloneNotSupportedException {
-//        super.clone();
         return (Player) this.clone();
     }
 

@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 
-public class SoundFilterMuffle extends FilterInputStream {
+public class SoundFilterQuieter extends FilterInputStream {
 
-    public SoundFilterMuffle(InputStream in) {
+    public SoundFilterQuieter(InputStream in) {
         super(in);
     }
     
@@ -21,15 +21,11 @@ public class SoundFilterMuffle extends FilterInputStream {
     }
 
     public int read(byte [] sample, int offset, int length) throws IOException{
-		// GET NUMBER OF BYTES
+		//GET NUMBER OF BYTES
 		int bytesRead = super.read(sample,offset,length);
-
-        //RATE OF CHANGE IN VOLUME/SAMPLE
-		float change = 2.0f * (1.0f / (float)bytesRead);
-        //100% VOLUME
-		float volume = 1f;
+        //80% VOLUME
+		float volume = .8f;
 		short amp=0;
-
         //LOOP THROUGH 2 BYTES PER ITERATION
 		for (int p=0; p<bytesRead; p = p + 2)
 		{
@@ -37,10 +33,8 @@ public class SoundFilterMuffle extends FilterInputStream {
 			amp = getSample(sample,p);
             //DECREASE
 			amp = (short)((float)amp * volume);
-            //SET NEW AMP VOLUME
+            //AMP VOLUME
 			setSample(sample,p,amp);
-			//MAKE QUIETER
-			volume = volume - change;
 		}
 		return length;
 	}

@@ -18,26 +18,24 @@ public class Activator extends Sprite{
         loadAnimations();
     }
 
+    //LOADS ANIMATIONS
     public void loadAnimations(){
         activatedAnim = new Animation();
         activatedAnim.loadAnimationFromSheet("images/activator/pressed.png", 1, 1, 1000);
     }
 
+    //RETURNS CLONE OF ACTIVATOR
     public Activator copy() throws CloneNotSupportedException {
         return (Activator) this.clone();
     }
 
+    //HANDLES COLLISION OF PLAYER
     public void handleCollisionWithPlayer(Player p){
         playerOn = true;
-        // if (!onRoof){
-        //     p.setY(getY());
-        // }
-        // else{
-        //     p.setY(getY()-p.getHeight());
-        // }
         activate(true);
         }
-
+    
+    //HANDLES COLLISION WITH CRATE (duh)
     public void handleCollisionWithCrate(Crate crate){
             crateOn = true;
             if (onRoof){
@@ -49,7 +47,7 @@ public class Activator extends Sprite{
             activate(true);
         }
 
-
+    //CHANGE STATE OF ACTIVATOR
     public void activate(boolean a){
         if (a == activated)
             return;
@@ -65,6 +63,9 @@ public class Activator extends Sprite{
                     lg.setVisible(true);
         }   
     }
+    
+    //GETTERS AND SETTERS
+    //----------------------------------------
     public void getLaserGates(ArrayList<LaserGate> laserGateList){
         laserGates = laserGateList;
     }

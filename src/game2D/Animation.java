@@ -317,6 +317,7 @@ public class Animation implements Cloneable{
         }
     }
 
+    //RETURNS CLONE OF ANIMATION
     public Animation copy() throws CloneNotSupportedException {
         return (Animation) this.clone();
     }

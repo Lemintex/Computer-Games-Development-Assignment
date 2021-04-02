@@ -8,10 +8,12 @@ public class Crate extends Sprite{
         crate = anim;
     }
 
+    //RETURN CLONE OF CRATE
     public Crate copy() throws CloneNotSupportedException {
         return (Crate) this.clone();
     }
 
+    //HANDLES COLLISION WITH PLAYER
     public void handleCollisionWithPlayer(Player p, char c, float g){
         if (c == 'x') {
             if (p.getVelocityX()>0 && p.getX()<getX() && p.getDirection() == 'r'){
@@ -36,9 +38,10 @@ public class Crate extends Sprite{
         }
     }
 
+    //STOPS CRATE
     public void stopCrate(Player p){
         if (getVelocityX()!=0){
-            super.setVelocityX(0);
+            setVelocityX(0);
         }
     }
 }

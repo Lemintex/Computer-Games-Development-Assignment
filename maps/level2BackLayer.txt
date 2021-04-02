@@ -17,18 +17,18 @@
 // The actual tile map is preceded by the #map line
 #map
 dddddddddddddddddddddddddddddddddddd
-d..L.....Q..........L......C.S.....d
+d..L..S..Q..........L......C.S.....d
 dQ.d................dddddd.d.......d
 dddd................L.Q..L.........d
 dSS.................L....L......B..d
 d...................dddddd.........d
 d..B.ddd.B..........SSSSSS.........d
-d.....O........BBBBB.d.............d
+d.....O............B.d.............d
 d..........................d.......d
 d.B.d...................B..A.......d
-d.B.d..............................d
-d.B.d.........................O....d
+dB..d.......Q...................dddd
+d.B.d.........................O.L.Qd
 d...S...dd.........O.........ddddddd
-d........S........ddddd.........O..d
-d.P.........O......A..L............d
+d.d......S........ddddd.B.......O..d
+d.P.........O......A..L...........Qd
 dddddddddddddddddddddddddddddddddddd

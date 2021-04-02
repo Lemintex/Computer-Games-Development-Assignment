@@ -8,10 +8,14 @@ public class Sound extends Thread {
 	String filename;	// The name of the file to play
 	boolean finished;	// A flag showing that the thread has finished
 	boolean loop;
-	public Sound(String fname, boolean l) {
+	boolean muffled;
+	boolean shhh;
+	public Sound(String fname, boolean l, boolean m, boolean shh) {
 		filename = fname;
 		finished = false;
 		loop = l;
+		muffled = m;
+		shhh = shh;
 	}
 
 	/**
@@ -22,21 +26,34 @@ public class Sound extends Thread {
 	 * the process scheduler.
 	 */
 	public void run() {
-
+		AudioInputStream is = null;
 		try {
 			File file = new File(filename);
 			AudioInputStream stream = AudioSystem.getAudioInputStream(file);
 			AudioFormat	format = stream.getFormat();
+			if (muffled){
+				SoundFilterMuffle f = new SoundFilterMuffle(stream);
+				is = new AudioInputStream(f, format, stream.getFrameLength());
+			}
+			else if (shhh){
+				SoundFilterQuieter f = new SoundFilterQuieter(stream);
+				is = new AudioInputStream(f, format, stream.getFrameLength());
+			}
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
 			Clip clip = (Clip)AudioSystem.getLine(info);
-			clip.open(stream);
+			if(muffled || shhh){
+				clip.open(is);
+			}
+			else{
+				clip.open(stream);
+			}
 			if (loop)
 				clip.loop(clip.LOOP_CONTINUOUSLY);
 			else
 				clip.start();
 			Thread.sleep(100);
 			while (clip.isRunning() && !finished) { Thread.sleep(10); }
-				// if (!loop)
+			
 				clip.close();
 		}
 		catch (Exception e) {	}

@@ -18,15 +18,18 @@ public class Slime extends Sprite{
         initialiseMovement();
     }
 
+    //LOAD ANIMATIONS
     public void loadAnimations(){
         slimeDie = new Animation();
         slimeDie.loadAnimationFromSheet("images/slime/die.png", 2, 2, 200);
     }
 
+    //GETS HIM MOVING
     public void initialiseMovement(){
         setVelocityX(getSpeed());
     }
 
+    //IS HE KILL?
     public boolean isDead(){
         if (slimeDie.hasLooped()){
             resetSlime();
@@ -36,6 +39,7 @@ public class Slime extends Sprite{
         return false;
     }
 
+    //RESETS HIM FOR RESPAWNING
     public void resetSlime(){
         dead = false;
         slimeDie.setLooped(false);
@@ -50,10 +54,12 @@ public class Slime extends Sprite{
         }
     }
 
+    //RETURNS CLONE OF SLIME
     public Slime copy() throws CloneNotSupportedException {
         return (Slime) this.clone();
     }
 
+    //HANDLE COLLISION WITH PLAYER
     public void handleCollisionWithPlayer(Player p, char c, float g) {
         if (c == 'y' && (Math.signum(g) == Math.signum(p.getVelocityY()) && !dead && respawned)){
             kill();
@@ -62,6 +68,8 @@ public class Slime extends Sprite{
         else if (!((c == 'n') || dead))
             p.kill();
     }
+
+    //HIS BRAIN
     public void move(boolean turn){
         if (getVelocityX() == 0){
             setVelocityX(getSpeed());
@@ -72,7 +80,10 @@ public class Slime extends Sprite{
         }
     }
 
+    //KILL DA SLIME
     public void kill(){
+        Sound slimeDeathSound = new Sound("sounds/slimeDeath.wav", false, true, false);
+        slimeDeathSound.start();
         setVelocityX(0);
         dead = true;
         setGrounded(false);
@@ -80,6 +91,8 @@ public class Slime extends Sprite{
         setAnimation(slimeDie);
     }
 
+    //GETTERS AND SETTERS
+    //----------------------------------------
     public void setOnRoof(boolean r){
         onRoof = r;
         if(onRoof){

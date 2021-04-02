@@ -8,7 +8,6 @@ import java.awt.geom.*;
  * This class provides the functionality for a moving animated image or Sprite.
  * 
  * @author David Cairns
- * @author Aaron Nobile
  */
 public class Sprite implements Cloneable{
 
