@@ -2,16 +2,12 @@ package game2D;
 
 public class Bat extends Sprite{
 
-    Animation batAngry, batDying;
     public Bat(Animation anim, float s) {
-        super(anim, 0);
-        batAngry = anim;
-        loadAnimations();
+        super(anim, 0.125f);
     }
 
-    public void loadAnimations(){
-        batDying = new Animation();
-        batDying.loadAnimationFromSheet("images/bat/die.png", 5, 1, 100);
+    public void initialiseMovement(){
+        setVelocityX(getSpeed());
     }
 
     public Bat copy() throws CloneNotSupportedException {
@@ -19,7 +15,17 @@ public class Bat extends Sprite{
     }
 
     @Override
-    public void handleCollisionWithPlayer(Player p, char c, float g) {
+    public void handleCollisionWithPlayer(Player p) {
+        p.kill();
+    }
 
+    public void move(boolean turn){
+        if (getVelocityX() == 0){
+            setVelocityX(getSpeed());
+        }
+        if (turn){
+            setVelocityX(-getVelocityX());
+            setScaleX((float)-getScaleX());
+        }
     }
 }

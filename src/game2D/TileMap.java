@@ -229,7 +229,8 @@ public class TileMap
 							if (line.charAt(col) == s.charAt(0)) {
 								Sprite sp;
 								sp = spritemap.get(s).copy();
-								if (sp instanceof Spikes || sp instanceof Slime || sp instanceof Spikes){
+								sp.setAnimation(spritemap.get(s).getAnimation().copy());
+								if (sp instanceof Activator || sp instanceof Slime || sp instanceof Spikes){
 									if(tmap[col][row-1].getCharacter() == '.'){
 										if (sp instanceof Activator)
 											((Activator)sp).setOnRoof(false);
@@ -240,12 +241,15 @@ public class TileMap
 									sp.setPosition(col * tileWidth, row * tileHeight);
 									}
 									else{
-										if (sp instanceof Activator)
+										if (sp instanceof Activator){
 											((Activator)sp).setOnRoof(true);
-										else if (sp instanceof Slime)
+										}
+										else if (sp instanceof Slime){
 											((Slime)sp).setOnRoof(true);
-										else if (sp instanceof Spikes)
+										}
+										else if (sp instanceof Spikes){
 											((Spikes)sp).setOnRoof(true);
+										}
 										sp.setPosition((col - .00000025f) * tileWidth, row * tileHeight);
 										// I don't know why, I don't want to know why, I don't want to have to wonder why,
 										// but for some ungodly reason setting the position of an upside down spike skews

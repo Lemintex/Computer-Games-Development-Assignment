@@ -15,7 +15,7 @@ import javax.swing.ImageIcon;
     
     @author David Cairns
 */
-public class Animation {
+public class Animation implements Cloneable{
 
     private ArrayList<AnimFrame> frames;	// The set of animation frames
     private int currFrameIndex;				// Current frame animation is on
@@ -315,5 +315,9 @@ public class Animation {
             this.image = image;
             this.endTime = endTime;
         }
+    }
+
+    public Animation copy() throws CloneNotSupportedException {
+        return (Animation) this.clone();
     }
 }

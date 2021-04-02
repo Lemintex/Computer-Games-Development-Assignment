@@ -5,14 +5,13 @@ import java.util.ArrayList;
 public class Activator extends Sprite{
 
     Animation deactivatedAnim, activatedAnim;
-    boolean activated, playerOn, crateOn, onRoof, toggleActivate;
+    boolean activated, playerOn, crateOn, onRoof;
     ArrayList<LaserGate> laserGates;
 
     public Activator(Animation anim) {
         super(anim, 0);
         deactivatedAnim = anim;
         activated = false;
-        toggleActivate = true;
         playerOn = false;
         crateOn = false;
         onRoof = false;
@@ -28,59 +27,44 @@ public class Activator extends Sprite{
         return (Activator) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Sprite p, char c, float g){
-        if (c == 'y' && g>0){
-            playerOn = true;
-            p.setY(super.getY()-p.getHeight());
-            p.setVelocityY(0);
-            activate(true);
-            toggleActivate = false;
-            p.setGrounded(true);
+    public void handleCollisionWithPlayer(Player p){
+        playerOn = true;
+        // if (!onRoof){
+        //     p.setY(getY());
+        // }
+        // else{
+        //     p.setY(getY()-p.getHeight());
+        // }
+        activate(true);
         }
-        else if (c == 'n'){
-            playerOn = false;
-            if (!crateOn){
-                toggleActivate = true;
-                activate(false);
-            }
 
-        }
-    }
-
-    public void handleCollisionWithCrate(Sprite crate, char c, float g){
-        if (c == 'y' && g>0){
+    public void handleCollisionWithCrate(Crate crate){
             crateOn = true;
-            crate.setY(super.getY()-crate.getHeight());
-            crate.setVelocityY(0);
-            activate(true);
-            toggleActivate = false;
-        }
-        else if (c == 'n'){
-            crateOn = false;
-            if (!playerOn){
-                toggleActivate = true;
-                activate(false);
+            if (onRoof){
+                crate.setY(getY());
             }
+            else{
+                crate.setY(getY()-crate.getHeight());
+            }
+            activate(true);
         }
-    }
 
 
     public void activate(boolean a){
         if (a == activated)
             return;
         activated = !activated;
-        if (activated){
-            super.setAnimation(activatedAnim);
+        if (activated && (playerOn || crateOn)){
+            setAnimation(activatedAnim);
             for(LaserGate lg: laserGates)
                 lg.setVisible(false);
         }
         else{
-            super.setAnimation(deactivatedAnim);
-            for(LaserGate lg: laserGates)
-                lg.setVisible(true);
-        }
-    }   
-
+            setAnimation(deactivatedAnim);
+                for(LaserGate lg: laserGates)
+                    lg.setVisible(true);
+        }   
+    }
     public void getLaserGates(ArrayList<LaserGate> laserGateList){
         laserGates = laserGateList;
     }
@@ -93,5 +77,21 @@ public class Activator extends Sprite{
 
     public boolean isOnRoof(){
         return onRoof;
+    }
+
+    public boolean getPlayerOn(){
+        return playerOn;
+    }
+
+    public void setPlayerOn(boolean p){
+        playerOn = p;
+    }
+
+    public boolean getCrateOn(){
+        return crateOn;
+    }
+
+    public void setCrateOn(boolean c){
+        crateOn = c;
     }
 }

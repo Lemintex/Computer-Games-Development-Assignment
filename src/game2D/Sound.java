@@ -35,12 +35,15 @@ public class Sound extends Thread {
 			else
 				clip.start();
 			Thread.sleep(100);
-			while (clip.isRunning()) { Thread.sleep(10); }
+			while (clip.isRunning() && !finished) { Thread.sleep(10); }
 				// if (!loop)
 				clip.close();
 		}
 		catch (Exception e) {	}
 			finished = true;
+	}
 
+	public void setStop(boolean s){
+		finished = s;
 	}
 }

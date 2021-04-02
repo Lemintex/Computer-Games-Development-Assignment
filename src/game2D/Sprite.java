@@ -39,6 +39,8 @@ public class Sprite implements Cloneable{
 
     // If render is 'true', the sprite will be drawn when requested
     private boolean render;
+
+    private boolean gravity;
     
     // The draw offset associated with this sprite. Used to draw it
     // relative to specific on screen position (usually the player)
@@ -478,10 +480,11 @@ public class Sprite implements Cloneable{
     }
 
     public void handleCollisionWithPlayer(Player p, char c, float g){
+        handleCollisionWithPlayer(p);
         //this will be used in polymorphism but has to be here
     }
 
-    public void handleCollisionWithCrate(Crate crate, char c, float g){
+    public void handleCollisionWithPlayer(Player p){
         //this will be used in polymorphism but has to be here
     }
 
@@ -490,10 +493,11 @@ public class Sprite implements Cloneable{
     }
 
     public void respawn(){
-
+        x = initX;
+        y = initY;
     }
 
-    public void move(char edge){
+    public void move(boolean turn){
         //this will be used in polymorphism but has to be here
     }
 

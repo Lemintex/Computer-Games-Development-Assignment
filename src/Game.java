@@ -2,12 +2,12 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-
+import java.util.HashMap;
 import java.awt.*;
 import java.util.LinkedList;
 
-
 import game2D.*;
+import java.awt.event.MouseEvent;
 
 // Game demonstrates how we can override the GameCore class
 // to create our own 'game'. We usually need to implement at
@@ -23,8 +23,8 @@ import game2D.*;
  */
 public class Game extends GameCore {
 	// Useful game constants
-	static int screenWidth = 1024;
-	static int screenHeight = 768;
+	static int screenWidth = 1600;
+	static int screenHeight = 1024;
 
 	float jump = 0.375f;
     float gravity = 0.0005f;
@@ -39,14 +39,18 @@ public class Game extends GameCore {
     ArrayList<LaserGate> laserGateList = new ArrayList<LaserGate>();
     ArrayList<LinkedList<Sprite>> backgroundList = new ArrayList<LinkedList<Sprite>>();   
     String[] level1Backgrounds = {"layer07_Sky", "layer06_Rocks", "layer05_Clouds", "layer04_Hills_2", "layer03_Hills_1", "layer02_Trees", "layer01_Ground"};
-    String[] musicLevel = {"sounds/music.wav"};
+    String[] musicLevel = {"sounds/musicLevel1.wav",  "sounds/musicLevel2.wav"};
 
-    TileMap tmap = new TileMap();	// Our tile map, note that we load it in init()
+    boolean menu = true, end = false, boundingBoxes = false, godMode = false;
+    TileMap[] tmap = new TileMap[5];	// Our tile map, note that we load it in init()
     String mapFolder = "maps";
-    String[] mapNames = {"level1.txt", "level2.txt"};
-    long total;         			// The score will be the total time elapsed since a crash
-    int currentLevel = 1;
-
+    HashMap<Integer, String[]> levels = new HashMap<Integer, String[]>();
+    String[] level1Layers = {"level1BackLayer.txt", "level1FrontLayer.txt"};
+    String[] level2Layers = {"level2BackLayer.txt", "level2FrontLayer.txt"};
+    int total;         			// The score will be the total time elapsed since a crash
+    int numCoins, currentLevel = 1, numberOfLevels = 2;
+    
+    Sound music;
     /**
 	 * The obligatory main method that creates
      * an instance of our class and starts it running
@@ -64,62 +68,97 @@ public class Game extends GameCore {
      * Initialise the class, e.g. set up variables, load images,
      * create animations, register event handlers
      */
+    public void initialise(){
+        levels.put(1, level1Layers);
+        levels.put(2, level2Layers);
+    }
 
+    //DISPLAYS THE MENU WHEN CALLED
+    public void mainMenu(Graphics2D g){
+        Rectangle playButton = new Rectangle(screenWidth/3, screenHeight/2, 250, 100);
+        Image menu = Toolkit.getDefaultToolkit().getImage("images/menu/wolf.png");
+        g.setColor(Color.white);
+        g.drawImage(menu, 0, 0, null);
+        g.draw(playButton);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 60));
+        g.drawString("Gravity Dude", screenWidth/4, screenHeight/4);
+        g.drawString("PLAY", screenWidth/3 + 50, screenHeight/2+80);
+        g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        g.drawString("Flip gravity with LMB and collect the coins!", 100, 800);
+    }
+
+    //DISPLAYS THE END SCREEN WHEN CALLED
+    public void endScreen(Graphics2D g){
+        Image menu = Toolkit.getDefaultToolkit().getImage("images/menu/wolf.png");
+        g.setColor(Color.white);
+        g.drawImage(menu, 0, 0, null);
+        g.drawString("Thanks for playing!", screenWidth/3, screenHeight/2);
+    }
+
+    //LOADS A NEW LEVELS TILEMAPS, MUSIC, AND CLEARS OLD LEVEL SPRITES AND SUCH
     public void loadLevel(){
         removeSprites.clear();
         spriteList.clear();
-        tmap.loadMap(mapFolder, mapNames[currentLevel - 1], initAnimations, spriteList);
+        laserGateList.clear();
+        numCoins = 0;
+        total = 0;
+        if (numberOfLevels < currentLevel){
+            end = true;
+            return;
+        }
+        music = new Sound(musicLevel[currentLevel-1], true);
+        music.setStop(false);
+        music.start();
+        if (gravity<0){
+            gravity = -gravity;
+        }
+        int i = 0;
+        //LOAD AND READ EACH TILEMAP
+        for (String s: levels.get(currentLevel)){
+            tmap[i] = new TileMap();
+            tmap[i].loadMap(mapFolder, s, initAnimations, spriteList);
+            i++;
+        }
+        
+        //COUNT SPECIFIC SPRITES AND DO STUFF WITH THEM
         for (Sprite sprite: spriteList){
+            if(sprite instanceof Coin){
+                numCoins++;
+            }
             if(sprite instanceof LaserGate){
                 laserGateList.add((LaserGate)sprite);
             }
+            sprite.loadAnimations();
         }
 
         boolean p = false;
         for (Sprite sprite: spriteList){
-            if(sprite instanceof Activator){
-                Activator a;
-                a = (Activator) sprite;
-                a.getLaserGates(laserGateList);
+            if (sprite instanceof Activator){
+                ((Activator)sprite).getLaserGates(laserGateList);
             }
+            //CHECK FOR PLAYER AND ONLY ONE PLAYER, AND GIVE IT A SPECIAL VARIABLE
             if (!p && sprite instanceof Player) {
                 player = (Player) sprite;
                 p = true;
-                break;
             }
         }
     }
 
+    //ONCE WE'RE OFF THE MENU, GET THE GAME GOING
     public void init()
     {         
         initialiseAnimations();
-        // Load the tile map and print it out so we can check it is valid
-        // tmap.loadMap("maps", "map.txt", initAnimations, spriteList);
+        initialise();
+
         loadLevel();
-        Sound music = new Sound(musicLevel[0], true);
-        // music.start();
         
-        setSize(tmap.getPixelWidth()/4, tmap.getPixelHeight());
+        setSize(screenWidth, screenHeight);
         setVisible(true);
-//        if (spriteList.contains(new Player))
-
-        for (Sprite sprite: spriteList)
-            sprite.loadAnimations();
-
-        // Load a single cloud animation
-        Animation ca = new Animation();
-        ca.addFrame(loadImage("images/cloud.png"), 1000);
 
         loadAllBackgrounds(backgroundList, level1Backgrounds, "level1/");
-        initialiseGame();
-      		
-        System.out.println(tmap);
     }
 
-    public void musicPlay(String filename){
-
-    }
-
+    //THESE ARE THE ANIMATIONS FOR ALL THE EXISTING SPRITES
     public void initialiseAnimations(){
         initPlayerAnim = new Animation();
         initPlayerAnim.loadAnimationFromSheet("images/player/idle.png", 2, 2, 250);
@@ -130,7 +169,7 @@ public class Game extends GameCore {
         initAnimations.add(initBatAnim);
 
         initCoinAnim = new Animation();
-        initCoinAnim.loadAnimationFromSheet("images/coin/coin.png", 3, 2, 250);
+        initCoinAnim.loadAnimationFromSheet("images/coin/coin.png", 3, 2, 100);
         initAnimations.add(initCoinAnim);
 
         initCrateAnim = new Animation();
@@ -154,75 +193,77 @@ public class Game extends GameCore {
         initAnimations.add(initSlimeAnim);
     }
 
-    /**
-     * You will probably want to put code to restart a game in
-     * a separate method so that you can call it to restart
-     * the game.
-     */
-    public void initialiseGame()
-    {
-    	total = 0;
-//        player.show();
-    }
-    
+   
     /**
      * Draw the current state of the game
      */
     public void draw(Graphics2D g)
     {    	
-    	// Be careful about the order in which you draw objects - you
-    	// should draw the background first, then work your way 'forward'
-
-    	// First work out how much we need to shift the view 
-    	// in order to see where the player is.
-
-        // If relative, adjust the offset so that
-        // it is relative to the player
-        // ...?
-        if (player.getX() >= 250){
+        //IF FINISHED, DRAW END SCREEN
+        if(end){
+            endScreen(g);
+        }
+        //IF IN THE MENU, DRAW IT
+        else if (menu){
+            mainMenu(g);
+        }
+        //OTHERWISE DRAW THE GAME
+        else{
+        //CALCULATE OFFSET
+        if (player.getX() >= 250 && player.getX()<=(tmap[0].getPixelWidth())-screenWidth+250){
             xo = 250 - (int)player.getX();
         }
-        else
-        {
-            xo = 0;
+        else if (player.getX()<250){
+            xo=0;
         }
+        else if(player.getX()<=(tmap[0].getPixelWidth())-screenWidth){
+            xo = tmap[0].getPixelWidth();
+        }
+        //DRAW THE BACKGROUNDS
         drawParallaxSprites(g, backgroundList);
-//        g.setColor(Color.white);
-//        g.fillRect(0, 0, getWidth(), getHeight());
 
-        // Apply offsets to sprites then draw them
+        //DRAW EACH ALIVE SPRITE
         for (Sprite s: spriteList)
         {
         	s.setOffsets(xo,yo);
         	s.drawTransformed(g);
-            s.drawBoundingBox(g);
-            s.drawBoundingCircle(g);
+            if (boundingBoxes){
+                s.drawBoundingBox(g);
+                s.drawBoundingCircle(g);
+            }
         }
 
-        // Apply offsets to player and draw 
-        player.setOffsets(xo, yo);
-        player.drawTransformed(g);
-
-        // Apply offsets to tile map and draw it
-        tmap.draw(g,xo,yo);    
-        
-        // Show score and status information
+        //DRAW TILEMAPS FROM BACK TO FRONT
+        for (TileMap m: tmap) {
+            if (m != null){
+            m.draw(g,xo,yo);    
+            }
+        }
+        //DRAW NUMBER OF COINS COLLECTED
         String msg = String.valueOf(total);
         g.setColor(Color.YELLOW);
         g.setFont(new Font("TimesRoman", Font.PLAIN, 60));
         g.drawString(msg, 75, getHeight()-75);;
     }
+}
+
 
     public void respawnAll(){
-        if (player.getRespawn()){                   
+        //IF THE PLAYER IS READY TO RESPAWN AFTER DYING
+        if (player.getRespawn()){        
+            total = 0;
+            numCoins = 0;
+            //UNDEADIFY SPRITES
             for (Sprite s: removeSprites){
                 spriteList.add(s);
             }
             removeSprites.clear();
+            //RESPAWN SPRITES AND COUNT COINS
             for (Sprite s: spriteList){
-                if (!(s instanceof Player)){
-                    s.setPosition(s.getInitialX(), s.getInitialY());
-                }
+                    s.respawn();
+                    if(s instanceof Coin){
+                        numCoins++;
+                    }
             }
         }
     }
@@ -233,17 +274,24 @@ public class Game extends GameCore {
      * @param elapsed The elapsed time between this call and the previous call of elapsed
      */    
     public void update(long elapsed) {
-        
+        if (!menu){
+        if(total == numCoins){
+            music.setStop(true);
+            currentLevel++;
+            loadLevel();
+            return;
+        }
+        respawnAll();
         for (LinkedList<Sprite> l : backgroundList) {
-            for (Sprite s : l){
-                s.update(elapsed);
+            for (Sprite b : l){
+                b.update(elapsed);
             }
         }
             
         for (Sprite s: spriteList) {
             float gravityConstant = 0;
             s.update(elapsed);
-            checkTileCollision(s, tmap);
+            checkTileCollision(s, tmap[0]);
             if (s instanceof Player){
                 ((Player)s).updateAnimations(gravity);
             }
@@ -258,6 +306,15 @@ public class Game extends GameCore {
                     gravityConstant = Math.signum(gravity);
                 }
             }
+            else if(s instanceof Activator){
+                if (((Activator)s).isOnRoof()){
+                    gravityConstant = Math.signum(-gravity);
+                }
+                else{
+                    gravityConstant = Math.signum(gravity);
+                }
+                
+            }
             else if(s instanceof Spikes){
                 if (((Spikes)s).isOnRoof()){
                     gravityConstant = Math.signum(-gravity);
@@ -265,14 +322,15 @@ public class Game extends GameCore {
                 else{
                     gravityConstant = Math.signum(gravity);
                 }
+
             } 
-            else if (!(s instanceof Bat || (s instanceof Activator && gravity<0) || s instanceof LaserGate)){
+            else if (!(s instanceof Bat || s instanceof Coin || (s instanceof Activator && gravity<0) || s instanceof LaserGate)){
                 gravityConstant = 1;
             }
             s.setVelocityY(s.getVelocityY() + (gravityConstant * gravity * elapsed));  
                 
             // Then check for any collisions that may have occurred
-            if (handleScreenEdge(s, tmap, elapsed)){
+            if (handleScreenEdge(s, tmap[0], elapsed)){
                 if (s instanceof Player){
                     s.kill();
                 }
@@ -281,9 +339,6 @@ public class Game extends GameCore {
                 }
             }
         }
-
-        // Then check for any collisions that may have occurred
-        // if (handleScreenEdge(player, tmap, elapsed);
 
 
         for (Sprite s1 : spriteList) {
@@ -294,12 +349,12 @@ public class Game extends GameCore {
                     boundingBoxCollision(s1, s2);
             }                
         }
-        
         for (Sprite dead: removeSprites){
             spriteList.remove(dead);
         }
     }
-    
+}
+
     /**
      * Checks and handles collisions with the edge of the screen
      * 
@@ -311,7 +366,9 @@ public class Game extends GameCore {
     {
     	// This method just checks if the sprite has gone off the bottom screen.
     	// Ideally you should use tile collision instead of this approach
-    	
+    	if(s==null){
+            return false;
+        }
         if (Float.compare(s.getY() + s.getHeight(), tmap.getPixelHeight())>0 || s.getY()<0)
         {
             return true;
@@ -336,13 +393,11 @@ public class Game extends GameCore {
                 break;
             case KeyEvent.VK_D: {
                 player.setDirection('r');
-//                player.setVelocityX(0.25f);
                 player.setScaleX(1);
                 break;
             }
             case KeyEvent.VK_A: {
                 player.setDirection('l');
-//                player.setVelocityX(-0.25f);
                 player.setScaleX(-1);
                 break;
             }
@@ -350,20 +405,36 @@ public class Game extends GameCore {
                 player.jump(jump, gravity);
                 break;
             }
-            case KeyEvent.VK_SPACE: {
-                if (player.isGrounded() && !player.isOnCrate()) {
-                    gravity = -gravity;
-                    player.setScaleY((float) -player.getScaleY());
-                    player.setGrounded(false);
-                }
+            case KeyEvent.VK_L: {
+                numCoins = total;
                 break;
             }
-            case KeyEvent.VK_R: {
-                initialiseGame();
+            case KeyEvent.VK_B:{
+                boundingBoxes = !boundingBoxes;
+                break;
+            }
+            case KeyEvent.VK_G:{
+                godMode = !godMode;
+                player.setGodMode(godMode);
                 break;
             }
             default:
                 break;
+        }
+    }
+
+    //MOUSE PRESSED EVENTS
+    public void mousePressed(MouseEvent e){
+        int mouseX = e.getX();
+        int mouseY = e.getY();
+
+        if (mouseX >= screenWidth/3 && mouseX <= (screenWidth/3) + 250 && mouseY >= screenHeight/2 && mouseY <= (screenHeight/2) + 100 && menu){ //IF BUTTON IN MENU IS CLICKED
+            menu = false;
+        }
+        else if(!end && !menu && player.isGrounded() && !player.isOnCrate()){
+            gravity = -gravity;
+            player.setScaleY((float) -player.getScaleY());
+            player.setGrounded(false);
         }
     }
 
@@ -375,7 +446,6 @@ public class Game extends GameCore {
      */
     public void boundingBoxCollision(Sprite s1, Sprite s2)
     {
-
         boolean overlapX = true, overlapY = true;
         float s1X = s1.getX();
         float s1Y = s1.getY();
@@ -387,45 +457,49 @@ public class Game extends GameCore {
         int s2width = s2.getWidth();
         int s2height = s2.getHeight();
 
+        //BASIC BOX COLLISION
         if ((s1X + s1width < s2X || s1X > s2X + s2width))
             overlapX = false;
         if ((s1Y + s1height < s2Y || s1Y > s2Y + s2height))
             overlapY = false;
+
+        //IF BOUNDING BOXES COLLIDE, CHECK MORE PRECISE COLLISION
         if (overlapX && overlapY){
             char c = 'y';
             if (Math.min(Math.abs(s1Y-(s2Y+s2height)), Math.abs((s1Y+s1height)-s2Y))>Math.min(Math.abs(s1X-(s2X+s2width)), Math.abs(s1X+s1width-s2X))){
                 c = 'x';
             }
-            else {
-                c = 'y';
-            }
-            if (s2 instanceof Crate || s2 instanceof LaserGate || boundingCircleCollision(s1, s2)){
+            //IF THE SPRITES COLLIDE
+            if (boundingCircleCollision(s1, s2)){
                 if (s1 instanceof Activator && s2 instanceof Crate){
-                    s1.handleCollisionWithCrate((Crate)s2, c, gravity);
+                    ((Activator)s1).handleCollisionWithCrate((Crate)s2);
                 }
-                else if (s1 instanceof Player){
-                    if (s2 instanceof Coin){
-                        Coin coin = (Coin) s2;
-                        if(coin.hitCoin(c)){
-                            total++;
-                            removeSprites.add(coin);
-                            coin.setVisible(false);
-                        }
-                    }
-                    else{
-                        s2.handleCollisionWithPlayer((Player)s1, c, gravity);
+                else{
+                    s2.handleCollisionWithPlayer((Player)s1, c, gravity);
+                    if(s2 instanceof Coin && !((Coin)s2).getCoinCollect()){
+                        total++;
+                        removeSprites.add(s2);
                     }
                 }
             }
         }
-        else if(s2 instanceof Crate && s1 instanceof Player && s1.getVelocityX() == 0){
+        //IF THE SPRITES DON'T COLLIDE
+        else if(s2 instanceof Crate && s1 instanceof Player){
             ((Crate)s2).stopCrate((Player)s1);
+        }
+        else if (s2 instanceof Activator){
+            if (s1 instanceof Crate){
+                ((Activator)s2).setCrateOn(false);
+            }
+            else if (s1 instanceof Player){
+                ((Activator)s2).setPlayerOn(false);
+            }
+            ((Activator)s2).activate(false);
         }
     }
     
     public boolean boundingCircleCollision(Sprite s1, Sprite s2){
         double distance = Math.hypot(Math.abs(s1.getX() - s2.getX()), Math.abs(s1.getY() - s2.getY()));
-        // double distance = s1.getRadius() + s2.a
         if (distance <= s1.getRadius() + s2.getRadius()){
             return true;
         }
@@ -505,6 +579,9 @@ public class Game extends GameCore {
             bottomFloor = true;
             if (gravity > 0 || (s instanceof Slime)){
                 s.setGrounded(true);
+                if (s instanceof Player){
+                    ((Player)s).setOnCrate(false);
+                }
             }
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(BLxtile, BLytile) - s.getHeight());
@@ -514,22 +591,22 @@ public class Game extends GameCore {
             topFloor = true;
             if (gravity < 0 || (s instanceof Slime)){
                 s.setGrounded(true);
+                if (s instanceof Player){
+                    ((Player)s).setOnCrate(false);
+                }
             }
             s.setVelocityY(0);
             s.setY(tmap.getTileYC(TLxtile, TLytile) + tileHeight);
         }
+        else if(!(bottomFloor || topFloor))
+        s.setGrounded(false);
+        Boolean leftContact = (BL!='.' || TL!='.'), rightContact = (BR!='.' || TR!='.');
+        if (leftContact != rightContact || (rightWall||leftWall)){
+            s.move(true);
+        }
         else{
-            s.setGrounded(false);
+            s.move(false);
         }
-        Boolean onLeftEdge = (BL!='.' || TL!='.'), onRightEdge = (BR!='.' || TR!='.');
-        char edge = 'n';
-        if ((onLeftEdge && !onRightEdge) || rightWall){
-            edge = 'r';
-        }
-        else if ((onRightEdge && !onLeftEdge) || leftWall){
-            edge = 'l';
-        }
-        s.move(edge);
     }
 
 	public void keyReleased(KeyEvent e) {
@@ -555,7 +632,7 @@ public class Game extends GameCore {
                 }
                 break;
             }
-            default :  break;
+            default:break;
 		}
 	}
 

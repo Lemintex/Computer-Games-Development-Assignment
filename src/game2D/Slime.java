@@ -19,13 +19,12 @@ public class Slime extends Sprite{
     }
 
     public void loadAnimations(){
-        initialiseMovement();
         slimeDie = new Animation();
         slimeDie.loadAnimationFromSheet("images/slime/die.png", 2, 2, 200);
     }
 
     public void initialiseMovement(){
-            setVelocityX(getSpeed());
+        setVelocityX(getSpeed());
     }
 
     public boolean isDead(){
@@ -63,13 +62,11 @@ public class Slime extends Sprite{
         else if (!((c == 'n') || dead))
             p.kill();
     }
-    public void move(char edge){
+    public void move(boolean turn){
         if (getVelocityX() == 0){
             setVelocityX(getSpeed());
         }
-        if (!(edge == 'n' || edge == memory || dead)){
-            setDirection(memory);
-            memory = edge;
+        if (turn){
             setVelocityX(-getVelocityX());
             setScaleX((float)-getScaleX());
         }
@@ -78,7 +75,7 @@ public class Slime extends Sprite{
     public void kill(){
         setVelocityX(0);
         dead = true;
-        super.setGrounded(false);
+        setGrounded(false);
         respawned = false;
         setAnimation(slimeDie);
     }

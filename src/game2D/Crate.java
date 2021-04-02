@@ -23,6 +23,7 @@ public class Crate extends Sprite{
                 setVelocityX(p.getVelocityX());
             }
             p.setOnCrate(false);
+            p.setGrounded(true);
         }
         else if (c == 'y'){
             if (g>0)
@@ -30,15 +31,14 @@ public class Crate extends Sprite{
             else
                 p.setY(getY()+getHeight()-1);
             p.setVelocityY(0);
-            p.setGrounded(false);
             p.setOnCrate(true);
+            p.setGrounded(false);
         }
     }
 
     public void stopCrate(Player p){
         if (getVelocityX()!=0){
             super.setVelocityX(0);
-            p.setOnCrate(false);
         }
     }
 }

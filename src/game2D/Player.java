@@ -3,7 +3,7 @@ package game2D;
 public class Player extends Sprite {//implements Cloneable{
 
     Animation playerIdle, playerRunning, playerJumping, playerFalling, playerDying;
-    boolean onCrate, respawn, dying;
+    boolean onCrate, respawn, dying, godMode;
     /**
      * Creates a new Sprite object with the specified Animation.
      *
@@ -16,6 +16,7 @@ public class Player extends Sprite {//implements Cloneable{
         onCrate = false;
         respawn = false;
         dying = false;
+        godMode = false;
     }
 
     public void loadAnimations(){
@@ -34,22 +35,30 @@ public class Player extends Sprite {//implements Cloneable{
     }
 
     public void updateAnimations(float gravity){
-        if(respawn && super.getAnimation() == playerDying){
+        if(dying && super.getAnimation() == playerDying){
             if (playerDying.hasLooped()){
-                respawn();
+                respawn = true;
+                // respawn();
             }
             return;
         }
         if (super.isGrounded() || onCrate) {
-            if (super.getVelocityX() == 0)
+            if (super.getVelocityX() == 0){
                 super.setAnimation(playerIdle);
-            else
-                super.setAnimation(playerRunning);
         }
-        else if (Math.signum(gravity) != Math.signum(super.getVelocityY()) && gravity != 0)
-            super.setAnimation(playerJumping);
-        else if ((Math.signum(gravity) == Math.signum(getVelocityY()) && gravity != 0 && !super.isGrounded()))
+        else{
+                super.setAnimation(playerRunning);
+            }
+        }
+        else if (Math.signum(gravity) != Math.signum(super.getVelocityY()) && gravity != 0){
+            setAnimation(playerJumping);
+        }
+        else if ((Math.signum(gravity) == Math.signum(getVelocityY()) && gravity != 0 && !super.isGrounded())){
             super.setAnimation(playerFalling);
+        }
+        else{
+            super.setAnimation(playerIdle);
+        }
     }
 
     
@@ -62,6 +71,7 @@ public class Player extends Sprite {//implements Cloneable{
             else if (gravity < 0)
                 super.setVelocityY(force);
             super.setGrounded(false);
+            setOnCrate(false);
         }
     }
 
@@ -80,7 +90,7 @@ public class Player extends Sprite {//implements Cloneable{
     }
 
     public void kill(){
-        if(!respawn){
+        if(!dying && !godMode){
         dying = true;
         Sound killSound = new Sound("sounds/playerDeath.wav", false);
         killSound.start();
@@ -88,7 +98,7 @@ public class Player extends Sprite {//implements Cloneable{
         super.setDirection('i');
         super.setVelocity(0, 0);
         super.setGrounded(false);
-        respawn = true;
+        // respawn = true;
         }
     }
 
@@ -98,6 +108,7 @@ public class Player extends Sprite {//implements Cloneable{
         onCrate = false;
         respawn = false;
         dying = false;
+        setGrounded(true);
     }
 
     public Player copy() throws CloneNotSupportedException {
@@ -115,5 +126,9 @@ public class Player extends Sprite {//implements Cloneable{
 
     public boolean getRespawn(){
         return respawn;
+    }
+
+    public void setGodMode(boolean g){
+        godMode = g;
     }
 }

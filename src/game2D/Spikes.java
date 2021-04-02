@@ -13,11 +13,9 @@ public class Spikes extends Sprite{
         return (Spikes) this.clone();
     }
 
-    public void handleCollisionWithPlayer(Player p, char c, float g){
-        if (c == 'y' || c == 'x'){
+    public void handleCollisionWithPlayer(Player p){
             p.kill();
         }
-    }
 
     public void setOnRoof(boolean r){
         onRoof = r;

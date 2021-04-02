@@ -1,0 +1,34 @@
+36 16 64 64
+// The first line should contain the width and height of the
+// map and the width and height of each tile. A list of character to
+// tile mappings is then provided where each character is preceded by a
+// # character. The dot character always defaults to a blank space
+// Note that the referenced files should be in the same directory as the
+// tile map.
+#d=dirt.png
+@A=Activator
+@B=Bat
+@C=Crate
+@L=LaserGate
+@O=Slime
+@P=Player
+@Q=Coin
+@S=Spikes
+// The actual tile map is preceded by the #map line
+#map
+dddddddddddddddddddddddddddddddddddd
+d..L.....Q..........L......C.S.....d
+dQ.d................dddddd.d.......d
+dddd................L.Q..L.........d
+dSS.................L....L......B..d
+d...................dddddd.........d
+d..B.ddd.B..........SSSSSS.........d
+d.....O........BBBBB.d.............d
+d..........................d.......d
+d.B.d...................B..A.......d
+d.B.d..............................d
+d.B.d.........................O....d
+d...S...dd.........O.........ddddddd
+d........S........ddddd.........O..d
+d.P.........O......A..L............d
+dddddddddddddddddddddddddddddddddddd
