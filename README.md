@@ -8,5 +8,5 @@ Gravity Dude is a 2D platforming game I made for a university assignment. We wer
 - neat multi-stage collision system for sprite to sprite contact, including directional detection to further enhance enemy mechanics
 - easily expandable level and parralax system
 
-#### I don't like how intertwined and wuestionable some of the code is, but I wrote this in third year.
+#### I don't like how intertwined and questionable some of the code is, but I wrote this in third year.
 I recieved 100% for his, although in my opinion it can be improved.
